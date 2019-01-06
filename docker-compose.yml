@@ -1,0 +1,20 @@
+version: '3'
+services:
+  web:
+    build: .
+    command: ["/usr/app/wait-for-it.sh", "mysql:3306", "--", "yarn", "run", "test"]
+
+    volumes:
+    - .:/usr/app/
+    ports:
+    - "3000:3000"
+    depends_on:
+    - mysql
+    environment:
+      NODE_ENV: test
+  mysql:
+    image: mysql:5.7
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: testPassword
