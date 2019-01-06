@@ -61,8 +61,19 @@ module.exports = function (app) {
         freezeTableName: true
       },
     });
-  } else {
+  } else if (dbURL) {
+    sequelize = new Sequelize(dbURL, {
+      dialect: 'mysql',
+      dialectOptions: connectionDetails.dialectOptions,
 
+      logging: false,
+      operatorsAliases,
+      define: {
+        freezeTableName: true
+      },
+    });
+
+  } else {
     sequelize = new Sequelize(connectionDetails.database, connectionDetails.username, connectionDetails.password, {
       dialect: 'mysql',
       host: connectionDetails.host,

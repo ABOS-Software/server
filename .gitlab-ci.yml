@@ -487,7 +487,7 @@ rollout 100%:
   # Auto DevOps variables and functions
   [[ "$TRACE" ]] && set -x
   auto_database_url=mysql://${mysql_USER}:${mysql_PASSWORD}@${CI_ENVIRONMENT_SLUG}-mysql:5432/${mysql_DB}
-  export DATABASE_URL=${DATABASE_URL-$auto_database_url}
+  export DATABASE_URL=${DATABASE_URL}
   export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
   export CI_APPLICATION_TAG=$CI_COMMIT_SHA
   export CI_CONTAINER_NAME=ci_job_build_${CI_JOB_ID}

@@ -10,4 +10,4 @@ RUN yarn install --dev
 COPY . .
 RUN chmod +x ./wait-for-it.sh
 
-CMD ["yarn", "run", "start"]
+CMD ["NODE_ENV=production", "yarn", "run", "start"]
