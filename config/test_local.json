@@ -15,7 +15,7 @@
     "password": "dev123",
     "host": "172.17.0.2",
     "port": 3306,
-    "logging": true,
+    "logging": console.log,
     "dialectOptions": {
       "decimalNumbers": true
     }

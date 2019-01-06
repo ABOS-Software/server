@@ -15,7 +15,7 @@
     "password": "testPassword",
     "host": "mysql",
     "port": 3306,
-    "logging": true,
+    "logging": console.log,
     "dialectOptions": {
       "decimalNumbers": true
     }
