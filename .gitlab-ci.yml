@@ -725,7 +725,7 @@ rollout 100%:
     else
       DB_HOST=localhost
     fi
-    export DATABASE_URL="mysql://root:${mysql_PASSWORD}@${DB_HOST}:3360/${mysql_DB}"
+    export DATABASE_URL="mysql://root:${mysql_PASSWORD}@${DB_HOST}:3306/${mysql_DB}"
   }
 
   function download_chart() {
