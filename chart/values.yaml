@@ -19,7 +19,7 @@ service:
   name: web
   type: ClusterIP
   url: http://my.host.com/
-  externalPort: 3030
+  externalPort: 443
   internalPort: 3030
 postgresql:
   enabled: false
