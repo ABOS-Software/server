@@ -16,12 +16,12 @@ const getUrl = pathname => url.format({
 before(async function () {
   this.server = app.listen(port);
   this.server.once('listening', async function () {
-    const models = app.get('sequelizeClient').models;
-    for (const name of Object.keys(models)) {
-      if ('associate' in models[name]) {
-        models[name].associate(models);
-      }
-    }
+    /* const models = app.get('sequelizeClient').models;
+     for (const name of Object.keys(models)) {
+       if ('associate' in models[name]) {
+         models[name].associate(models);
+       }
+     }*/
     /*  }
       Object.keys(models).forEach(name => {
         if ('associate' in models[name]) {
