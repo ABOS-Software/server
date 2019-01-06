@@ -637,7 +637,6 @@ rollout 100%:
         --set application.database_url="$DATABASE_URL" \
         --set service.url="$CI_ENVIRONMENT_URL" \
         --set replicaCount="$replicas" \
-
         "$name" \
         chart/
 
@@ -663,7 +662,6 @@ rollout 100%:
         --set application.database_url="$DATABASE_URL" \
         --set service.url="$CI_ENVIRONMENT_URL" \
         --set replicaCount="$replicas" \
-
         --namespace="$KUBE_NAMESPACE" \
         "$name" \
         chart/
