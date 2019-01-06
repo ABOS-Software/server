@@ -728,11 +728,13 @@ rollout 100%:
 
   function download_chart() {
     if [[ ! -d chart ]]; then
+      echo "Using remote charts"
       auto_chart=${AUTO_DEVOPS_CHART:-gitlab/auto-deploy-app}
       auto_chart_name=$(basename $auto_chart)
       auto_chart_name=${auto_chart_name%.tgz}
       auto_chart_name=${auto_chart_name%.tar.gz}
     else
+      echo "Using local charts"
       auto_chart="chart"
       auto_chart_name="chart"
     fi
@@ -826,7 +828,7 @@ rollout 100%:
   function create_secret() {
     echo "Create secret..."
     echo $GOOGLE_CREDENTIALS > credentials.json
-    kubectl create secrete -n "$KUBE_NAMESPACE" \
+    kubectl create secret -n "$KUBE_NAMESPACE" \
     generic cloudsql-instance-credentials --from-file ./credentials.json
 
     if [[ "$CI_PROJECT_VISIBILITY" == "public" ]]; then
