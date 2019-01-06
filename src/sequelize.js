@@ -50,6 +50,7 @@ module.exports = function (app) {
     logging = false;
   }
   if (app.get('env') === 'test' && dbURL !== '') {
+    console.log(dbURL);
     sequelize = new Sequelize(dbURL, {
       dialect: 'mysql',
       dialectOptions: connectionDetails.dialectOptions,
