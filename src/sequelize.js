@@ -43,15 +43,14 @@ module.exports = function (app) {
   let sequelize;
   if (app.get('env') === 'test' && dbURL !== '') {
     sequelize = new Sequelize(dbURL, {
-      dialect: 'postgres',
-      host: connectionDetails.host,
-      port: connectionDetails.port,
+      dialect: 'mysql',
+      dialectOptions: connectionDetails.dialectOptions,
+
       logging: connectionDetails.logging,
       operatorsAliases,
       define: {
         freezeTableName: true
       },
-      dialectOptions: {},
     });
   } else {
 
