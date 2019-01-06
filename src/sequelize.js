@@ -49,63 +49,68 @@ module.exports = function (app) {
   } else {
     logging = false;
   }
-  if (app.get('env') === 'test' && dbURL !== '') {
-    console.log(dbURL);
-    sequelize = new Sequelize(dbURL, {
-      dialect: 'mysql',
-      dialectOptions: connectionDetails.dialectOptions,
+  console.log(dbURL);
+  try {
+    if (app.get('env') === 'test' && dbURL !== '') {
+      console.log(dbURL);
+      sequelize = new Sequelize(dbURL, {
+        dialect: 'mysql',
+        dialectOptions: connectionDetails.dialectOptions,
 
-      logging: logging,
-      operatorsAliases,
-      define: {
-        freezeTableName: true
-      },
-    });
-  } else if (dbURL) {
-    sequelize = new Sequelize(dbURL, {
-      dialect: 'mysql',
-      dialectOptions: connectionDetails.dialectOptions,
+        logging: logging,
+        operatorsAliases,
+        define: {
+          freezeTableName: true
+        },
+      });
+    } else if (dbURL) {
+      sequelize = new Sequelize(dbURL, {
+        dialect: 'mysql',
+        dialectOptions: connectionDetails.dialectOptions,
 
-      logging: false,
-      operatorsAliases,
-      define: {
-        freezeTableName: true
-      },
-    });
+        logging: false,
+        operatorsAliases,
+        define: {
+          freezeTableName: true
+        },
+      });
 
-  } else {
-    sequelize = new Sequelize(connectionDetails.database, connectionDetails.username, connectionDetails.password, {
-      dialect: 'mysql',
-      host: connectionDetails.host,
-      port: connectionDetails.port,
-      logging: logging,
-      operatorsAliases,
-      define: {
-        freezeTableName: true
-      },
-      dialectOptions: connectionDetails.dialectOptions,
-    });
-  }
-  const oldSetup = app.setup;
-
-  app.set('sequelizeClient', sequelize);
-
-  app.setup = function (...args) {
-    const result = oldSetup.apply(this, args);
-
-    // Set up data relationships
-    const models = sequelize.models;
-    Object.keys(models).forEach(name => {
-      if ('associate' in models[name]) {
-        models[name].associate(models);
-      }
-    });
-
-    // Sync to the database
-    if (app.get('env') !== 'test' && app.get('env') !== 'test_local') {
-      sequelize.sync();
+    } else {
+      sequelize = new Sequelize(connectionDetails.database, connectionDetails.username, connectionDetails.password, {
+        dialect: 'mysql',
+        host: connectionDetails.host,
+        port: connectionDetails.port,
+        logging: logging,
+        operatorsAliases,
+        define: {
+          freezeTableName: true
+        },
+        dialectOptions: connectionDetails.dialectOptions,
+      });
     }
+    const oldSetup = app.setup;
 
-    return result;
-  };
+    app.set('sequelizeClient', sequelize);
+
+    app.setup = function (...args) {
+      const result = oldSetup.apply(this, args);
+
+      // Set up data relationships
+      const models = sequelize.models;
+      Object.keys(models).forEach(name => {
+        if ('associate' in models[name]) {
+          models[name].associate(models);
+        }
+      });
+
+      // Sync to the database
+      if (app.get('env') !== 'test' && app.get('env') !== 'test_local') {
+        sequelize.sync();
+      }
+
+      return result;
+    };
+  } catch (e) {
+    console.error('problems connecting to database', e);
+  }
 };
