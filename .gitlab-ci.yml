@@ -56,8 +56,8 @@ variables:
   DOCKER_DRIVER: overlay2
 
 stages:
-  - staging
   - build
+  - staging
 
   - review
   - dast
