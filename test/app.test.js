@@ -13,8 +13,8 @@ const getUrl = pathname => url.format({
   port,
   pathname
 });
-before(() => {
-  app.get('sequelizeClient').sync({force: true}).then(() => {
+before(async function () {
+  await app.get('sequelizeClient').sync({force: true}).then(() => {
     app.service('role').create([{
       authority: 'ROLE_ADMIN',
     }, {authority: 'ROLE_USER'}]);
