@@ -825,6 +825,10 @@ rollout 100%:
 
   function create_secret() {
     echo "Create secret..."
+    echo $GOOGLE_CREDENTIALS > credentials.json
+    kubectl create secrete -n "$KUBE_NAMESPACE" \
+    generic cloudsql-instance-credentials --from-file ./credentials.json
+
     if [[ "$CI_PROJECT_VISIBILITY" == "public" ]]; then
       return
     fi

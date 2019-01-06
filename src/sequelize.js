@@ -68,7 +68,7 @@ module.exports = function (app) {
         dialect: 'mysql',
         dialectOptions: connectionDetails.dialectOptions,
 
-        logging: false,
+        logging: console.log,
         operatorsAliases,
         define: {
           freezeTableName: true
