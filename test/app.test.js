@@ -40,11 +40,11 @@ describe('Feathers application tests', () => {
     this.server.once('listening', () => done());
   });
   before(function () {
-    return app.get('sequelizeClient').sync({force: true}).then(() => {
-      return app.service('role').create([{
-        authority: 'ROLE_ADMIN',
-      }, {authority: 'ROLE_USER'}]);
-    });
+    /*    return app.get('sequelizeClient').sync({force: true}).then(() => {
+          return app.service('role').create([{
+            authority: 'ROLE_ADMIN',
+          }, {authority: 'ROLE_USER'}]);
+        });*/
   });
   after(function (done) {
     this.server.close(done);
