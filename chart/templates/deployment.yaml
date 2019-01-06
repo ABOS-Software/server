@@ -21,48 +21,48 @@ spec:
         release: {{ .Release.Name }}
     spec:
       imagePullSecrets:
-  {{ toYaml .Values.image.secrets | indent 10 }}
-containers:
-  - name: {{ .Chart.Name }}
-    image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-    imagePullPolicy: {{ .Values.image.pullPolicy }}
-    {{- if .Values.application.secretName }}
-    envFrom:
-      - secretRef:
-          name: {{ .Values.application.secretName }}
-    {{- end }}
-    env:
-      - name: DATABASE_URL
-        value: {{ .Values.application.database_url | quote }}
-    ports:
-      - name: "{{ .Values.service.name }}"
-        containerPort: {{ .Values.service.internalPort }}
-    livenessProbe:
-      httpGet:
-        path: /
-        port: {{ .Values.service.internalPort }}
-      initialDelaySeconds: 15
-      timeoutSeconds: 15
-    readinessProbe:
-      httpGet:
-        path: /
-        port: {{ .Values.service.internalPort }}
-      initialDelaySeconds: 5
-      timeoutSeconds: 3
-  - name: cloudsql-proxy
-      image: gcr.io/cloudsql-docker/gce-proxy:1.11
-      command: ["/cloud_sql_proxy",
-                "-instances=<INSTANCE_CONNECTION_NAME>=tcp:3306",
-                "-credential_file=/secrets/cloudsql/credentials.json"]
-      securityContext:
-        runAsUser: 2  # non-root user
-        allowPrivilegeEscalation: false
-      volumeMounts:
-        - name: cloudsql-instance-credentials
-          mountPath: /secrets/cloudsql
-          readOnly: true
-  volumes:
-    - name: cloudsql-instance-credentials
-      secret:
-        secretName: cloudsql-instance-credentials
-  {{- end -}}
+{{ toYaml .Values.image.secrets | indent 10 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.application.secretName }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.application.secretName }}
+          {{- end }}
+          env:
+            - name: DATABASE_URL
+              value: {{ .Values.application.database_url | quote }}
+          ports:
+            - name: "{{ .Values.service.name }}"
+              containerPort: {{ .Values.service.internalPort }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.service.internalPort }}
+            initialDelaySeconds: 15
+            timeoutSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.service.internalPort }}
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+        - name: cloudsql-proxy
+            image: gcr.io/cloudsql-docker/gce-proxy:1.11
+            command: ["/cloud_sql_proxy",
+                      "-instances=<INSTANCE_CONNECTION_NAME>=tcp:3306",
+                      "-credential_file=/secrets/cloudsql/credentials.json"]
+            securityContext:
+              runAsUser: 2  # non-root user
+              allowPrivilegeEscalation: false
+            volumeMounts:
+              - name: cloudsql-instance-credentials
+                mountPath: /secrets/cloudsql
+                readOnly: true
+        volumes:
+          - name: cloudsql-instance-credentials
+            secret:
+              secretName: cloudsql-instance-credentials
+{{- end -}}
