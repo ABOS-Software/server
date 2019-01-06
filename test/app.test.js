@@ -14,11 +14,34 @@ const getUrl = pathname => url.format({
   pathname
 });
 before(async function () {
-  await app.get('sequelizeClient').sync({force: true}).then(() => {
-    app.service('role').create([{
+  const models = app.get('sequelizeClient').models;
+  for (const name of Object.keys(models)) {
+    if ('associate' in models[name]) {
+      models[name].associate(models);
+    }
+  }
+  /*  }
+    Object.keys(models).forEach(name => {
+      if ('associate' in models[name]) {
+        models[name].associate(models);
+      }
+    });*/
+  await app.get('sequelizeClient').sync({force: true}).then(async function () {
+    await app.service('role').create([{
       authority: 'ROLE_ADMIN',
     }, {authority: 'ROLE_USER'}]);
-    request(app)
+    await app.service('user').create({
+      'username': 'test',
+      'password': 'test',
+      'full_name': 'test Name'
+    }).then(user => {
+      assert.ok(user, 'User Creation Failed');
+      user.should.hasOwnProperty('role_id', 'NO Role_ID').above(0, 'NO ROLE ASSIGNED');
+      user.should.hasOwnProperty('username', 'NO username').equal('test', 'Username not saved correctly');
+      user.should.hasOwnProperty('full_name', 'NO full_name').equal('test Name', 'full name not saved correctly');
+      return 'user';
+    });
+    await request(app)
       .post('/authentication')
       .send({
         'strategy': 'local',
