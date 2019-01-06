@@ -49,6 +49,7 @@
     "jsreport-jsrender": "^2.0.0",
     "jsreport-phantom-pdf": "^2.1.4",
     "mysql2": "^1.6.4",
+    "pg": "^7.7.1",
     "puppeteer": "^1.11.0",
     "ramda": "^0.26.1",
     "sequelize": "^4.42.0",

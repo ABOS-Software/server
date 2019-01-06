@@ -39,19 +39,34 @@ const operatorsAliases = {
 
 module.exports = function (app) {
   const connectionDetails = app.get('mysql');
+  let dbURL = process.env.DATABASE_URL;
+  let sequelize;
+  if (app.get('env') === 'test' && dbURL !== '') {
+    sequelize = new Sequelize(dbURL, {
+      dialect: 'postgres',
+      host: connectionDetails.host,
+      port: connectionDetails.port,
+      logging: connectionDetails.logging,
+      operatorsAliases,
+      define: {
+        freezeTableName: true
+      },
+      dialectOptions: {},
+    });
+  } else {
 
-
-  const sequelize = new Sequelize(connectionDetails.database, connectionDetails.username, connectionDetails.password, {
-    dialect: 'mysql',
-    host: connectionDetails.host,
-    port: connectionDetails.port,
-    logging: connectionDetails.logging,
-    operatorsAliases,
-    define: {
-      freezeTableName: true
-    },
-    dialectOptions: connectionDetails.dialectOptions,
-  });
+    sequelize = new Sequelize(connectionDetails.database, connectionDetails.username, connectionDetails.password, {
+      dialect: 'mysql',
+      host: connectionDetails.host,
+      port: connectionDetails.port,
+      logging: connectionDetails.logging,
+      operatorsAliases,
+      define: {
+        freezeTableName: true
+      },
+      dialectOptions: connectionDetails.dialectOptions,
+    });
+  }
   const oldSetup = app.setup;
 
   app.set('sequelizeClient', sequelize);
