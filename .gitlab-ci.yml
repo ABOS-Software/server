@@ -85,7 +85,7 @@ test:
   services:
     - mysql:5.7
   variables:
-    MYSQL_DATABASE: $mysql_DB
+    MYSQL_DATABASE: test
     MYSQL_ROOT_PASSWORD: $mysql_PASSWORD
   stage: test
   image: gliderlabs/herokuish:latest
