@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 const assert = require('assert');
 var should = require('should');
 
@@ -14,47 +16,50 @@ const getUrl = pathname => url.format({
   pathname
 });
 before(async function () {
-  this.server = app.listen(port);
-  this.server.once('listening', async function () {
-    /* const models = app.get('sequelizeClient').models;
-     for (const name of Object.keys(models)) {
-       if ('associate' in models[name]) {
-         models[name].associate(models);
-       }
-     }*/
-    /*  }
-      Object.keys(models).forEach(name => {
-        if ('associate' in models[name]) {
-          models[name].associate(models);
-        }
-      });*/
-    await app.get('sequelizeClient').sync({force: true}).then(async function () {
-      await app.service('role').create([{
-        authority: 'ROLE_ADMIN',
-      }, {authority: 'ROLE_USER'}]);
-      await app.service('user').create({
-        'username': 'test',
-        'password': 'test',
-        'full_name': 'test Name'
-      }).then(user => {
-        assert.ok(user, 'User Creation Failed');
-        user.should.hasOwnProperty('role_id', 'NO Role_ID').above(0, 'NO ROLE ASSIGNED');
-        user.should.hasOwnProperty('username', 'NO username').equal('test', 'Username not saved correctly');
-        user.should.hasOwnProperty('full_name', 'NO full_name').equal('test Name', 'full name not saved correctly');
-        return 'user';
-      });
-      await request(app)
-        .post('/authentication')
-        .send({
-          'strategy': 'local',
+  return new Promise(function (resolve, reject) {
+    const server = app.listen(port);
+
+    server.on('listening', async function () {
+      /* const models = app.get('sequelizeClient').models;
+       for (const name of Object.keys(models)) {
+         if ('associate' in models[name]) {
+           models[name].associate(models);
+         }
+       }*/
+      /*  }
+        Object.keys(models).forEach(name => {
+          if ('associate' in models[name]) {
+            models[name].associate(models);
+          }
+        });*/
+      await app.get('sequelizeClient').sync({force: true}).then(async function () {
+        await app.service('role').create([{
+          authority: 'ROLE_ADMIN',
+        }, {authority: 'ROLE_USER'}]);
+        await app.service('user').create({
           'username': 'test',
-          'password': 'test'
-        })
-        .expect(201)
-        .end((err, res) => {
-          console.log(res.body.accessToken);
-          app.set('TEST_JWT_TOKEN', res.body.accessToken);
+          'password': 'test',
+          'full_name': 'test Name'
+        }).then(user => {
+          assert.ok(user, 'User Creation Failed');
+          user.should.hasOwnProperty('role_id', 'NO Role_ID').above(0, 'NO ROLE ASSIGNED');
+          user.should.hasOwnProperty('username', 'NO username').equal('test', 'Username not saved correctly');
+          user.should.hasOwnProperty('full_name', 'NO full_name').equal('test Name', 'full name not saved correctly');
         });
+        await request(app)
+          .post('/authentication')
+          .send({
+            'strategy': 'local',
+            'username': 'test',
+            'password': 'test'
+          })
+          .expect(201)
+          .then((res, err) => {
+            console.log(res.body.accessToken);
+            app.set('TEST_JWT_TOKEN', res.body.accessToken);
+            resolve();
+          });
+      });
     });
   });
 
@@ -62,20 +67,20 @@ before(async function () {
 });
 
 describe('Feathers application tests', () => {
-  before(function (done) {
-    this.server = app.listen(port);
-    this.server.once('listening', () => done());
-  });
-  before(function () {
-    /*    return app.get('sequelizeClient').sync({force: true}).then(() => {
-          return app.service('role').create([{
-            authority: 'ROLE_ADMIN',
-          }, {authority: 'ROLE_USER'}]);
-        });*/
-  });
-  after(function (done) {
-    this.server.close(done);
-  });
+  /*  before(function (done) {
+      this.server = app.listen(port);
+      this.server.once('listening', () => done());
+    });
+    before(function () {
+      /!*    return app.get('sequelizeClient').sync({force: true}).then(() => {
+            return app.service('role').create([{
+              authority: 'ROLE_ADMIN',
+            }, {authority: 'ROLE_USER'}]);
+          });*!/
+    });
+    after(function (done) {
+      //this.server.close(done);
+    });*/
 
   it('starts and shows the index page', () => {
     return rp(getUrl()).then(body =>
@@ -105,21 +110,6 @@ describe('Feathers application tests', () => {
         assert.equal(res.error.code, 404);
         assert.equal(res.error.message, 'Page not found');
         assert.equal(res.error.name, 'NotFound');
-      });
-    });
-  });
-  describe('Test Data', () => {
-    it('test User', function () {
-      return app.service('user').create({
-        'username': 'test',
-        'password': 'test',
-        'full_name': 'test Name'
-      }).then(user => {
-        assert.ok(user, 'User Creation Failed');
-        user.should.hasOwnProperty('role_id', 'NO Role_ID').above(0, 'NO ROLE ASSIGNED');
-        user.should.hasOwnProperty('username', 'NO username').equal('test', 'Username not saved correctly');
-        user.should.hasOwnProperty('full_name', 'NO full_name').equal('test Name', 'full name not saved correctly');
-        return 'user';
       });
     });
   });

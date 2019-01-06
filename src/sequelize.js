@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 const Sequelize = require('sequelize');
 const {Op} = Sequelize;
 const operatorsAliases = {
@@ -41,12 +43,18 @@ module.exports = function (app) {
   const connectionDetails = app.get('mysql');
   let dbURL = process.env.DATABASE_URL;
   let sequelize;
+  let logging;
+  if (connectionDetails.logging) {
+    logging = console.log;
+  } else {
+    logging = false;
+  }
   if (app.get('env') === 'test' && dbURL !== '') {
     sequelize = new Sequelize(dbURL, {
       dialect: 'mysql',
       dialectOptions: connectionDetails.dialectOptions,
 
-      logging: connectionDetails.logging,
+      logging: logging,
       operatorsAliases,
       define: {
         freezeTableName: true
@@ -58,7 +66,7 @@ module.exports = function (app) {
       dialect: 'mysql',
       host: connectionDetails.host,
       port: connectionDetails.port,
-      logging: connectionDetails.logging,
+      logging: logging,
       operatorsAliases,
       define: {
         freezeTableName: true
