@@ -83,7 +83,7 @@ build:
 
 test:
   services:
-    - mysql:latest
+    - mysql:5.7
   variables:
     MYSQL_DATABASE: $mysql_DB
     MYSQL_ROOT_PASSWORD: $mysql_PASSWORD
