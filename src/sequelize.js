@@ -83,7 +83,9 @@ module.exports = function (app) {
     });
 
     // Sync to the database
-    sequelize.sync();
+    if (app.get('env') !== 'test' && app.get('env') !== 'test_local') {
+      sequelize.sync();
+    }
 
     return result;
   };

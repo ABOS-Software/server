@@ -13,6 +13,26 @@ const getUrl = pathname => url.format({
   port,
   pathname
 });
+before(() => {
+  app.get('sequelizeClient').sync({force: true}).then(() => {
+    app.service('role').create([{
+      authority: 'ROLE_ADMIN',
+    }, {authority: 'ROLE_USER'}]);
+    request(app)
+      .post('/authentication')
+      .send({
+        'strategy': 'local',
+        'username': 'test',
+        'password': 'test'
+      })
+      .expect(201)
+      .end((err, res) => {
+        console.log(res.body.accessToken);
+        app.set('TEST_JWT_TOKEN', res.body.accessToken);
+      });
+  });
+
+});
 
 describe('Feathers application tests', () => {
   before(function (done) {
@@ -87,6 +107,7 @@ describe('Feathers application tests', () => {
         })
         .expect(201)
         .end((err, res) => {
+          console.log(res.body.accessToken);
           app.set('TEST_JWT_TOKEN', res.body.accessToken);
           if (err) {
             done(err);
