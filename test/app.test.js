@@ -16,6 +16,7 @@ const getUrl = pathname => url.format({
   pathname
 });
 before(async function () {
+  this.timeout(5000);
   return new Promise(function (resolve, reject) {
     const server = app.listen(port);
 
