@@ -23,6 +23,7 @@
   },
   "scripts": {
     "test": "node src/setupTestDataBase.js && yarn run mocha",
+    "coverage": "node src/setupTestDataBase.js && nyc mocha $NODE_DEBUG_OPTION test/ --recursive --exit | tap-nyc",
     "eslint": "eslint src/. test/. --config .eslintrc.json",
     "dev": "nodemon src/",
     "start": "node $NODE_DEBUG_OPTION src/",
@@ -62,9 +63,11 @@
     "eslint": "^5.9.0",
     "mocha": "^5.2.0",
     "nodemon": "^1.18.7",
+    "nyc": "^13.1.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
     "should": "^13.2.3",
-    "supertest": "^3.3.0"
+    "supertest": "^3.3.0",
+    "tap-nyc": "^1.0.3"
   }
 }
