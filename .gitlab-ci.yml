@@ -86,12 +86,11 @@ test:
     MYSQL_DATABASE: test
     MYSQL_ROOT_PASSWORD: $mysql_PASSWORD
   stage: test
-  image: gliderlabs/herokuish:latest
+  image: node:8.10.0-alpine
   script:
     - setup_test_db
-    - echo $DATABASE_URL
-    - cp -R . /tmp/app
-    - /bin/herokuish buildpack test
+    - yarn --dev install
+    - yarn run coverage
   only:
     - branches
   except:
