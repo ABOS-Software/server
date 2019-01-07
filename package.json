@@ -23,7 +23,7 @@
   },
   "scripts": {
     "test": "node src/setupTestDataBase.js && yarn run mocha",
-    "coverage": "node src/setupTestDataBase.js && nyc mocha $NODE_DEBUG_OPTION test/ --recursive --exit | tap-nyc",
+    "coverage": "node src/setupTestDataBase.js && nyc mocha $NODE_DEBUG_OPTION test/ --recursive --exit",
     "eslint": "eslint src/. test/. --config .eslintrc.json",
     "dev": "nodemon src/",
     "start": "node $NODE_DEBUG_OPTION src/",
