@@ -56,7 +56,6 @@ variables:
   DOCKER_DRIVER: overlay2
 
 stages:
-  - deploy
 
   - build
 
@@ -67,6 +66,8 @@ stages:
   - production
 
   - performance
+  - deploy
+
   - cleanup
 
 build:
