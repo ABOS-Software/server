@@ -92,6 +92,7 @@ test:
     - setup_test_db
     - yarn --dev install
     - yarn run coverage
+    - yarn nyc report --reporter=text-summary
   only:
     - branches
   except:
