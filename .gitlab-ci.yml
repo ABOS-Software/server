@@ -240,6 +240,7 @@ dast:
       - $DAST_DISABLED
 
 develop:
+  image: google/cloud-sdk:alpine
   stage: deploy
   script:
     - create_config
@@ -262,6 +263,7 @@ develop:
 # STAGING_ENABLED.
 
 staging:
+  image: google/cloud-sdk:alpine
   stage: deploy
   script:
     - create_config
@@ -279,6 +281,7 @@ staging:
 
 .production: &production_template
   stage: deploy
+  image: google/cloud-sdk:alpine
   script:
     - create_config
     - create_secret
