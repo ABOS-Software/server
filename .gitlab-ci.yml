@@ -56,6 +56,8 @@ variables:
   DOCKER_DRIVER: overlay2
 
 stages:
+  - deploy
+
   - build
 
   - review
@@ -63,7 +65,6 @@ stages:
 
   - test
   - production
-  - deploy
 
   - performance
   - cleanup
@@ -240,20 +241,16 @@ dast:
 develop:
   stage: deploy
   script:
-    - check_kube_domain
-    - install_dependencies
-    - download_chart
-    - ensure_namespace
-    - initialize_tiller
+    - create_config
     - create_secret
-    - deploy
+    - gcloud --quiet --project $PROJECT_ID app deploy app.develop.yaml
+    - persist_environment_url
   environment:
     name: develop
     url: https://develop.$AUTO_DEVOPS_DOMAIN
   only:
     refs:
       - develop
-    kubernetes: active
 
 
 
@@ -266,35 +263,25 @@ develop:
 staging:
   stage: deploy
   script:
-    - check_kube_domain
-    - install_dependencies
-    - download_chart
-    - ensure_namespace
-    - initialize_tiller
+    - create_config
     - create_secret
-    - deploy
+    - gcloud --quiet --project $PROJECT_ID app deploy app.staging.yaml
+    - persist_environment_url
   environment:
     name: staging
     url: https://staging.$AUTO_DEVOPS_DOMAIN
   only:
     refs:
       - next
-    kubernetes: active
 
 
 
 .production: &production_template
   stage: deploy
   script:
-    - check_kube_domain
-    - install_dependencies
-    - download_chart
-    - ensure_namespace
-    - initialize_tiller
+    - create_config
     - create_secret
-    - deploy
-    - delete canary
-    - delete rollout
+    - gcloud --quiet --project $PROJECT_ID app deploy app.yaml
     - persist_environment_url
   environment:
     name: production
@@ -307,13 +294,7 @@ production:
   only:
     refs:
       - master
-    kubernetes: active
-  except:
-    variables:
-      - $STAGING_ENABLED
-      - $CANARY_ENABLED
-      - $INCREMENTAL_ROLLOUT_ENABLED
-      - $INCREMENTAL_ROLLOUT_MODE
+
 
 
 # ---------------------------------------------------------------------------
@@ -329,6 +310,8 @@ production:
   export TILLER_NAMESPACE=$KUBE_NAMESPACE
   # Extract "MAJOR.MINOR" from CI_SERVER_VERSION and generate "MAJOR-MINOR-stable" for Security Products
   export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
+
+
 
   function registry_login() {
     if [[ -n "$CI_REGISTRY_USER" ]]; then
@@ -660,24 +643,15 @@ production:
     echo ""
   }
 
+  function create_config() {
+    echo "Create Config..."
+    echo $APPLICATION_CONFIG > config/production.json
+  }
+
   function create_secret() {
     echo "Create secret..."
     echo $GOOGLE_CREDENTIALS > credentials.json
-    kubectl create secret -n "$KUBE_NAMESPACE" \
-    generic cloudsql-instance-credentials --from-file ./credentials.json \
-    -o yaml --dry-run | kubectl replace -n "$KUBE_NAMESPACE" --force -f -
-
-    if [[ "$CI_PROJECT_VISIBILITY" == "public" ]]; then
-      return
-    fi
-
-    kubectl create secret -n "$KUBE_NAMESPACE" \
-      docker-registry gitlab-registry \
-      --docker-server="$CI_REGISTRY" \
-      --docker-username="${CI_DEPLOY_USER:-$CI_REGISTRY_USER}" \
-      --docker-password="${CI_DEPLOY_PASSWORD:-$CI_REGISTRY_PASSWORD}" \
-      --docker-email="$GITLAB_USER_EMAIL" \
-      -o yaml --dry-run | kubectl replace -n "$KUBE_NAMESPACE" --force -f -
+    gcloud auth activate-service-account --key-file credentials.json
   }
 
   function dast() {
