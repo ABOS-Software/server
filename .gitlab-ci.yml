@@ -56,13 +56,13 @@ variables:
   DOCKER_DRIVER: overlay2
 
 stages:
+  - test
 
   - build
 
   - review
   - dast
 
-  - test
   - production
 
   - performance
@@ -89,11 +89,17 @@ test:
     MYSQL_ROOT_PASSWORD: $mysql_PASSWORD
   stage: test
   image: node:8.10.0-alpine
+  before_script:
+    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+    - chmod +x ./cc-test-reporter
+    - ./cc-test-reporter before-build
+  after_script:
+    - ./cc-test-reporter after-build
   script:
     - setup_test_db
     - yarn --dev install
     - yarn run coverage
-    - yarn nyc report --reporter=text-summary
+    - yarn nyc report --reporter=lcov
   only:
     - branches
   except:
