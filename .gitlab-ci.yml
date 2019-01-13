@@ -90,16 +90,18 @@ test:
   stage: test
   image: node:8.15.0-stretch-slim
   before_script:
+
+  after_script:
+  script:
     - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
     - chmod +x ./cc-test-reporter
     - ./cc-test-reporter before-build
-  after_script:
-    - ./cc-test-reporter after-build
-  script:
     - setup_test_db
     - yarn --dev install
     - yarn run coverage
     - yarn nyc report --reporter=lcov
+    - ./cc-test-reporter after-build
+
   only:
     - branches
   except:
