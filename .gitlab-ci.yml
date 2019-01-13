@@ -88,7 +88,7 @@ test:
     MYSQL_DATABASE: test
     MYSQL_ROOT_PASSWORD: $mysql_PASSWORD
   stage: test
-  image: node:8.10.0-alpine
+  image: node:8.15.0-stretch-slim
   before_script:
     - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
     - chmod +x ./cc-test-reporter
