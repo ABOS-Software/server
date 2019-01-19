@@ -57,7 +57,6 @@ variables:
 
 stages:
 
-  - build
   - test
 
   - review
@@ -70,16 +69,7 @@ stages:
 
   - cleanup
 
-build:
-  stage: build
-  image: docker:stable-git
-  services:
-    - docker:stable-dind
-  script:
-    - setup_docker
-    - build
-  only:
-    - branches
+
 
 test:
   services:
