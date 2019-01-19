@@ -7,7 +7,7 @@ module.exports = {
     all: [authenticate('jwt'), checkPermissions(['ROLE_ADMIN'])],
     find: [disallow()],
     get: [disallow()],
-    create: [disallow()],
+    create: [],
     update: [disallow()],
     patch: [disallow()],
     remove: [disallow()]

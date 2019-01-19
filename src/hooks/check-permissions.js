@@ -6,7 +6,7 @@ const {Forbidden} = require('@feathersjs/errors');
 module.exports = function (roleParam) {
 
   return async context => {
-    if (!context.params.provider || context.params.authenticated) {
+    if (!context.params.provider) {
       return Promise.resolve(context);
     }
     if (roleParam && roleParam[0]) {
