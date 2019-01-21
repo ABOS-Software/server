@@ -1,9 +1,7 @@
 // Initializes the `reports` service on path `/reports`
-const createService = require('./reports.class.js');
-const hooks = require('./reports.hooks');
+
 const auth = require('@feathersjs/authentication');
 const template = require('./Reports.js');
-const testData = require('./test.json');
 module.exports = function (app) {
 
   const paginate = app.get('paginate');
