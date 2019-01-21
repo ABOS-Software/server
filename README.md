@@ -16,42 +16,10 @@ Development
 ----------
 This software has been developed as a side project of mine, starting back in 2013. The backend is developed using the Grails framework. The frontend uses React-admin as a base. 
 
-License
-------------
-Major Components:
-Frontend:
-*   Material UI - MIT
-*   CSV-Parse - BSD-3-Clause
-*   Download JS - MIT
-*   google-map-react - MIT
-*   immutability-helper - MIT
-*   jwt-decode - MIT
-*   points-cluster - ISC
-*   react - MIT
-*   react-admin - MIT
-*   react-data-grid - MIT
-*   react-dom - MIT
-*   react-number-format - MIT
-*   react-places-autocomplete - MIT
-*   xml-js - MIT
+[![Maintainability](https://api.codeclimate.com/v1/badges/67a4d939df59975d6afd/maintainability)](https://codeclimate.com/github/ABOS-Software/server/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/67a4d939df59975d6afd/test_coverage)](https://codeclimate.com/github/ABOS-Software/server/test_coverage) [![codebeat badge](https://codebeat.co/badges/f1b071c2-39af-4ddc-9d6c-9fe571a92482)](https://codebeat.co/projects/gitlab-com-abos-software-abos-server-master) [![Total alerts](https://img.shields.io/lgtm/alerts/g/ABOS-Software/server.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/ABOS-Software/server/alerts/) [![pipeline status](https://gitlab.com/ABOS-Software/abos-server/badges/master/pipeline.svg)](https://gitlab.com/ABOS-Software/abos-server/commits/master)
 
-Backend
-*   Grails 3.2.13 - Apache Version 2.0
-*   GORM 6.1.10 - Apache Version 2.0
-*   gradle-node Version 0.13 - Apache Version 2.0
-*   spring-security-rest Version 2.0.0.M2 - Apache Version 2.0
-*   grails-restsearch-plugin - No license, modified to suit application
-*   HikariCP Version 2.7.8 - Apache Version 2
-*   SLF4J - MIT
-*   Apache Commons Version 3.7 - Apache Version 2
-*   iText Version 5.10 -  AGPL v3
-*   JTidy Version 938 -  Custom license
-*   Saxon Version 9 -   MPLv2
-*   GMapsFX Versopm 2.12.0 - Apache Version 2
-*   Maven Model - Apache Version 2
-*   Flyway V5.0.7 - Apache Version 2
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgitlab.com%2FABOS-Software%2Fabos-server.svg?type=large)](https://app.fossa.io/projects/git%2Bgitlab.com%2FABOS-Software%2Fabos-server?ref=badge_large)
 
-A more detailed listing can be found in [this Google Spreadsheet](https://docs.google.com/spreadsheets/d/1GoBVyoI-fE9oIf4SDmPR3tIlRTtTjdrcsqLL5LmpeNY/edit?usp=sharing)
 
 As the Author and owner of the code in this project, I do not endorse or fault any of the author(s) of the used or included libraries.
 
