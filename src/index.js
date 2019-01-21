@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const logger = require('./logger');
 const app = require('./app');
-const port = app.get('port');
+const port = process.env.PORT || app.get('port');
 
 if (app.get('env') !== 'test' && app.get('env') !== 'test_local') {
   const server = app.listen(port);

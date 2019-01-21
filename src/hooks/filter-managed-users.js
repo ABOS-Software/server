@@ -12,6 +12,9 @@ module.exports = function (options = {}) {
   const {field, createField} = options;
 
   return async context => {
+    if (!context.params.provider) {
+      return Promise.resolve(context);
+    }
     if (context.path === 'user' && !context.params.payload) {
       return context;
     }
@@ -52,6 +55,12 @@ module.exports = function (options = {}) {
       if (context.method === 'find' || context.method === 'get') {
         context.params.query[field] = {'$in': userIds};
 
+      } else if (context.method === 'remove') {
+        let uId = await context.service.get(context.id);
+        if (!userIds.includes(uId.user_id)) {
+          throw new BadRequest('Invalid User ID');
+          //        console.log(context);
+        }
       } else {
         if (!userIds.includes(context.data[createField])) {
           throw new BadRequest('Invalid User ID');
