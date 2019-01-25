@@ -20,6 +20,7 @@ coverage
 build/Release
 
 config/production.json
+config/default.json
 
 # Dependency directory
 # Commenting this out is preferred by some people, see

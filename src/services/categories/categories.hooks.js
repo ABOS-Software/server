@@ -1,44 +1,27 @@
 const {authenticate} = require('@feathersjs/authentication').hooks;
+const sequelizeParams = () => {
+  return async context => {
+    const seqClient = context.app.get('sequelizeClient');
 
+    const year = seqClient.models['year'];
+    if (context.params.query.year) {
+      context.params.query.year_id = context.params.query.year;
+      delete context.params.query.year;
+
+    }
+    context.params.sequelize = {
+      attributes: ['id', ['category_name', 'categoryName'], ['delivery_date', 'deliveryDate']],
+      include: [{model: year, attributes: ['id']}]
+    };
+
+    return context;
+  };
+};
 module.exports = {
   before: {
     all: [authenticate('jwt')],
-    find(context) {
-      // Get the Sequelize instance. In the generated application via:
-      //  const sequelize = context.app.get('sequelizeClient');
-      const seqClient = context.app.get('sequelizeClient');
-
-      const year = seqClient.models['year'];
-      if (context.params.query.year) {
-        context.params.query.year_id = context.params.query.year;
-        delete context.params.query.year;
-
-      }
-      context.params.sequelize = {
-        attributes: ['id', ['category_name', 'categoryName'], ['delivery_date', 'deliveryDate']],
-        include: [{model: year, attributes: ['id']}]
-      };
-
-      return context;
-    },
-    get: [(context) => {
-      // Get the Sequelize instance. In the generated application via:
-      //  const sequelize = context.app.get('sequelizeClient');
-      const seqClient = context.app.get('sequelizeClient');
-
-      const year = seqClient.models['year'];
-      if (context.params.query.year) {
-        context.params.query.year_id = context.params.query.year;
-        delete context.params.query.year;
-
-      }
-      context.params.sequelize = {
-        attributes: ['id', ['category_name', 'categoryName'], ['delivery_date', 'deliveryDate']],
-        include: [{model: year, attributes: ['id']}]
-      };
-
-      return context;
-    }],
+    find: [sequelizeParams()] ,
+    get: [sequelizeParams()],
     create: [(context) => {
       // Get the Sequelize instance. In the generated application via:
       //  const sequelize = context.app.get('sequelizeClient');

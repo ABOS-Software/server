@@ -5,7 +5,7 @@ const {disallow} = require('feathers-hooks-common');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
 module.exports = {
   before: {
-    all: [disallow()],
+    all: [disallow('external')],
     find: [],
     get: [],
     create: [],

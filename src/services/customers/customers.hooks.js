@@ -4,7 +4,53 @@ const {ordersAttr, customerAttr, orderedProductsAttr, yearAttr, userAttr, produc
 const {authenticate} = require('@feathersjs/authentication').hooks;
 const checkPermissions = require('../../hooks/check-permissions');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
+const sequelizeParams = () => {
+  return async context => {
+    // Get the Sequelize instance. In the generated application via:
+    const sequelize = context.app.get('sequelizeClient');
+    const orderedProducts = sequelize.models['ordered_products'];
+    const categories = sequelize.models['categories'];
 
+    const orders = sequelize.models['orders'];
+    const products = sequelize.models['products'];
+
+    const user = sequelize.models['user'];
+
+    const year = sequelize.models['year'];
+    let yrInc = {model: year, attributes: yearAttr};
+    if (context.params.query.year) {
+      yrInc.where = {id: context.params.query.year};
+      delete context.params.query.year;
+
+    }
+
+    context.params.sequelize = {
+      include: [yrInc, {
+        model: user,
+        attributes: userAttr
+      }, {
+        model: orders,
+        attributes: ordersAttr,
+        include: [{
+          model: orderedProducts,
+          attributes: orderedProductsAttr,
+          include: [{
+            model: products,
+            attributes: productsAttr,
+            include: [{model: categories}, {model: year, attributes: yearAttr}],
+            as: 'products'
+          }, {model: year, attributes: yearAttr}],
+          as: 'orderedProducts'
+        }, {model: year, attributes: yearAttr}],
+        as: 'order'
+      }],
+      attributes: customerAttr,
+    };
+
+
+    return context;
+  };
+};
 // const seqClient = app.get('sequelizeClient');
 // const orders = seqClient.models['orders'];
 // const orderedProducts = seqClient.models['ordered_products'];
@@ -12,90 +58,8 @@ const filterManagedUsers = require('../../hooks/filter-managed-users');
 module.exports = {
   before: {
     all: [authenticate('jwt'), checkPermissions(['ROLE_USER']), filterManagedUsers()],
-    find(context) {
-      // Get the Sequelize instance. In the generated application via:
-      const sequelize = context.app.get('sequelizeClient');
-      const orderedProducts = sequelize.models['ordered_products'];
-      const categories = sequelize.models['categories'];
-
-      const orders = sequelize.models['orders'];
-      const products = sequelize.models['products'];
-
-      const user = sequelize.models['user'];
-
-      const year = sequelize.models['year'];
-      let yrInc = {model: year, attributes: yearAttr};
-      if (context.params.query.year) {
-        yrInc.where = {id: context.params.query.year};
-        delete context.params.query.year;
-
-      }
-
-      context.params.sequelize = {
-        include: [yrInc, {
-          model: user,
-          attributes: userAttr
-        }, {
-          model: orders,
-          attributes: ordersAttr,
-          include: [{
-            model: orderedProducts,
-            attributes: orderedProductsAttr,
-            include: [{
-              model: products,
-              attributes: productsAttr,
-              include: [{model: categories}, {model: year, attributes: yearAttr}],
-              as: 'products'
-            }, {model: year, attributes: yearAttr}],
-            as: 'orderedProducts'
-          }, {model: year, attributes: yearAttr}],
-          as: 'order'
-        }],
-        attributes: customerAttr,
-      };
-
-
-      return context;
-    },
-    get(context) {
-      // Get the Sequelize instance. In the generated application via:
-      //  const sequelize = context.app.get('sequelizeClient');
-
-      const sequelize = context.app.get('sequelizeClient');
-      const orderedProducts = sequelize.models['ordered_products'];
-      const categories = sequelize.models['categories'];
-
-      const orders = sequelize.models['orders'];
-      const products = sequelize.models['products'];
-
-      const user = sequelize.models['user'];
-
-      const year = sequelize.models['year'];
-      context.params.sequelize = {
-        include: [{model: year, attributes: yearAttr}, {
-          model: user,
-          attributes: userAttr
-        }, {
-          model: orders,
-          attributes: ordersAttr,
-          include: [{
-            model: orderedProducts,
-            attributes: orderedProductsAttr,
-            include: [{
-              model: products,
-              attributes: productsAttr,
-              include: [{model: categories}, {model: year, attributes: yearAttr}],
-              as: 'products'
-            }, {model: year, attributes: yearAttr}],
-            as: 'orderedProducts'
-          }, {model: year, attributes: yearAttr}],
-          as: 'order'
-        }],
-        attributes: customerAttr,
-      };
-
-      return context;
-    },
+    find: [sequelizeParams()],
+    get: [sequelizeParams()],
     async create(context) {
       const sequelize = context.app.get('sequelizeClient');
       // const seqClient = context.app.get('sequelizeClient');
