@@ -7,20 +7,10 @@ class Service {
 
   async find(params) {
     const seqClient = this.app.get('sequelizeClient');
-    const categories = seqClient.models['categories'];
-    const customers = seqClient.models['customers'];
-    const groups = seqClient.models['groups'];
-    const orderedProducts = seqClient.models['ordered_products'];
-    const orders = seqClient.models['orders'];
-    const products = seqClient.models['products'];
-    const role = seqClient.models['role'];
-    const RoleHierarchyEntry = seqClient.models['role_hierarchy_entry'];
     const user = seqClient.models['user'];
     const userManager = seqClient.models['user_manager'];
-    const userRole = seqClient.models['user_role'];
     const userYear = seqClient.models['user_year'];
     const year = seqClient.models['year'];
-    console.log(params);
     let yr = await year.findByPk(params.query.year);
     let users = await user.findAll({
       attributes: ['id', 'full_name', 'username'],
@@ -93,17 +83,8 @@ class Service {
 
   async create(data, params) {
     const seqClient = this.app.get('sequelizeClient');
-    const categories = seqClient.models['categories'];
-    const customers = seqClient.models['customers'];
-    const groups = seqClient.models['groups'];
-    const orderedProducts = seqClient.models['ordered_products'];
-    const orders = seqClient.models['orders'];
-    const products = seqClient.models['products'];
-    const role = seqClient.models['role'];
-    const RoleHierarchyEntry = seqClient.models['role_hierarchy_entry'];
     const user = seqClient.models['user'];
     const userManager = seqClient.models['user_manager'];
-    const userRole = seqClient.models['user_role'];
     const userYear = seqClient.models['user_year'];
     const year = seqClient.models['year'];
     //   log.debug(jsonParams.toString());
@@ -126,12 +107,7 @@ class Service {
           for (let enabledU of enabledUsers) {
             enabledU.status = 'ARCHIVED';
             await enabledU.save();
-            /*if (cr) {
-                // enabledU.errors.allErrors.each {
-                //     println it
-                // }
-            }*/
-            //enabledU.save()
+
           }
           u.status = 'ENABLED';
 
