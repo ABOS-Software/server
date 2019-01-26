@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 const Sequelize = require('sequelize');
 const {Op} = Sequelize;
 const operatorsAliases = {
@@ -38,8 +36,7 @@ const operatorsAliases = {
   $values: Op.values,
   $col: Op.col
 };
-
-module.exports = function (app) {
+const getSequelizeInstance = (app) => {
   const connectionDetails = app.get('mysql');
   let dbURL = process.env.DATABASE_URL || connectionDetails.URL;
   let sequelize;
@@ -88,29 +85,34 @@ module.exports = function (app) {
         dialectOptions: connectionDetails.dialectOptions,
       });
     }
-    const oldSetup = app.setup;
-
-    app.set('sequelizeClient', sequelize);
-
-    app.setup = function (...args) {
-      const result = oldSetup.apply(this, args);
-
-      // Set up data relationships
-      const models = sequelize.models;
-      Object.keys(models).forEach(name => {
-        if ('associate' in models[name]) {
-          models[name].associate(models);
-        }
-      });
-
-      // Sync to the database
-      if (app.get('env') !== 'test' && app.get('env') !== 'test_local') {
-        sequelize.sync();
-      }
-
-      return result;
-    };
   } catch (e) {
     console.error('problems connecting to database', e);
   }
+  return sequelize;
+};
+module.exports = function (app) {
+
+  const oldSetup = app.setup;
+  let sequelize = getSequelizeInstance(app);
+  app.set('sequelizeClient', sequelize);
+
+  app.setup = function (...args) {
+    const result = oldSetup.apply(this, args);
+
+    // Set up data relationships
+    const models = sequelize.models;
+    Object.keys(models).forEach(name => {
+      if ('associate' in models[name]) {
+        models[name].associate(models);
+      }
+    });
+
+    // Sync to the database
+    if (app.get('env') !== 'test' && app.get('env') !== 'test_local') {
+      sequelize.sync();
+    }
+
+    return result;
+  };
+
 };
