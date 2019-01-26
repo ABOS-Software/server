@@ -2,19 +2,7 @@
 const createService = require('./user-hierarchy.class.js');
 const hooks = require('./user-hierarchy.hooks');
 
+const {registerService} = require('../registerService');
 module.exports = function (app) {
-
-  const paginate = app.get('paginate');
-
-  const options = {
-    paginate
-  };
-
-  // Initialize our service with any options it requires
-  app.use('/UserHierarchy', createService(options, app));
-
-  // Get our initialized service so that we can register hooks
-  const service = app.service('UserHierarchy');
-
-  service.hooks(hooks);
+  registerService(app, createService, 'UserHierarchy', hooks);
 };

@@ -17,35 +17,21 @@ const sequelizeParams = () => {
     return context;
   };
 };
+const addUpdateData = () => {
+  return async context => {
+    context.data.group_name = context.data.GroupName;
+    context.data.year_id = context.data.year;
+    return context;
+  };
+};
 module.exports = {
   before: {
     all: [authenticate('jwt'), checkPermissions(['ROLE_USER'])],
     find: [sequelizeParams()],
     get: [sequelizeParams()],
-    create: [(context) => {
-      // Get the Sequelize instance. In the generated application via:
-      //  const sequelize = context.app.get('sequelizeClient');
-
-      context.data.group_name = context.data.GroupName;
-      context.data.year_id = context.data.year;
-      return context;
-    }, checkPermissions(['ROLE_ADMIN'])],
-    update: [(context) => {
-      // Get the Sequelize instance. In the generated application via:
-      //  const sequelize = context.app.get('sequelizeClient');
-
-      context.data.group_name = context.data.GroupName;
-      context.data.year_id = context.data.year;
-      return context;
-    }, checkPermissions(['ROLE_ADMIN'])],
-    patch: [(context) => {
-      // Get the Sequelize instance. In the generated application via:
-      //  const sequelize = context.app.get('sequelizeClient');
-
-      context.data.group_name = context.data.GroupName;
-      context.data.year_id = context.data.year;
-      return context;
-    }, checkPermissions(['ROLE_ADMIN'])],
+    create: [addUpdateData(), checkPermissions(['ROLE_ADMIN'])],
+    update: [addUpdateData(), checkPermissions(['ROLE_ADMIN'])],
+    patch: [addUpdateData(), checkPermissions(['ROLE_ADMIN'])],
     remove: [checkPermissions(['ROLE_ADMIN'])]
   },
 

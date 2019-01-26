@@ -20,7 +20,6 @@ class Service {
     const userRole = seqClient.models['user_role'];
     const userYear = seqClient.models['user_year'];
     const year = seqClient.models['year'];
-    console.log(params);
     let yr = await year.findByPk(params.query.year);
     let users = await user.findAll({
       attributes: ['id', 'full_name', 'username'],
