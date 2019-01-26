@@ -63,6 +63,64 @@ const sequelizeParams = () => {
     return context;
   };
 };
+const getOrder = async (custData, sequelize) => {
+  const orders = sequelize.models['orders'];
+
+  let order;
+  if (custData.order.id) {
+    order = await orders.findByPk(custData.order.id);
+    order.set(custData.order);
+  } else {
+    order = orders.build(custData.order);
+  }
+  return order;
+};
+const getOrderedProduct = async (op, sequelize) => {
+  const orderedProducts = sequelize.models['ordered_products'];
+
+  let opM;
+  if (op.id) {
+    opM = await orderedProducts.findByPk(op.id);
+    opM.set(op);
+  } else {
+    opM = orderedProducts.build(op);
+  }
+  return opM;
+};
+const updateOrderedProducts = async (order, customer, custData, sequelize) => {
+  const products = sequelize.models['products'];
+  let user = await customer.getUser();
+  let year = await customer.getYear();
+  let ops = [];
+  order.user_name = custData.user_name;
+
+  for (const op of custData.order.orderedProducts) {
+
+    let opM = await getOrderedProduct(op, sequelize);
+    let product = await products.findByPk(op.products_id);
+    opM.user_name = custData.user_name;
+
+    opM.setUser(user, {save: false});
+    opM.setYear(year, {save: false});
+    opM.setCustomer(customer, {save: false});
+    opM.setOrder(order, {save: false});
+    opM.setProducts(product, {save: false});
+    let response5 = await opM.save();
+    ops.push(response5);
+  }
+  return ops;
+};
+const generateResult = async (ord, customer, seqClient, context) => {
+  const customers = seqClient.models['customers'];
+
+  if (typeof ord !== ValidationError) {
+    const options = await makeOptions(seqClient);
+    context.result = await customers.findByPk(customer.id, options);
+    if (context.result.dataValues.order) {
+      context.result.dataValues.order.dataValues.orderedProducts = calcProductCosts(context.result.dataValues.order);
+    }
+  }
+};
 const saveOrder = () => {
   return async context => {
     let custData;
@@ -75,57 +133,14 @@ const saveOrder = () => {
 
     const seqClient = context.app.get('sequelizeClient');
     const customers = seqClient.models['customers'];
-    const orders = seqClient.models['orders'];
-    const products = seqClient.models['products'];
-    const orderedProducts = seqClient.models['ordered_products'];
 
-    let order;
-    if (custData.order.id) {
-      order = await orders.findByPk(custData.order.id);
-      order.set(custData.order);
-    } else {
-      order = orders.build(custData.order);
-    }
+    let order = await getOrder(custData, seqClient);
     let customer = await customers.findByPk(custData.id);
-    let user = await customer.getUser();
-    let year = await customer.getYear();
-    let ops = [];
-    order.user_name = custData.user_name;
-
-    for (const op of custData.order.orderedProducts) {
-
-      /*}
-      await custData.order.orderedProducts.forEach(async op => {*/
-      let opM;
-      if (op.id) {
-        opM = await orderedProducts.findByPk(op.id);
-        opM.set(op);
-      } else {
-        opM = orderedProducts.build(op);
-      }
-      let product = await products.findByPk(op.products_id);
-      opM.user_name = custData.user_name;
-
-      opM.setUser(user, {save: false});
-      opM.setYear(year, {save: false});
-      opM.setCustomer(customer, {save: false});
-      opM.setOrder(order, {save: false});
-      opM.setProducts(product, {save: false});
-      // console.log(opM.toJSON());
-      let response5 = await opM.save();
-      ops.push(response5);
-    }
+    let ops = await updateOrderedProducts(order, customer, custData, seqClient);
     await order.setOrderedProducts(ops, {save: false});
     //
     let ord = await order.save();
-    if (typeof ord !== ValidationError) {
-      const options = await makeOptions(seqClient);
-      context.result = await customers.findByPk(customer.id, options);
-      if (context.result.dataValues.order) {
-        context.result.dataValues.order.dataValues.orderedProducts = calcProductCosts(context.result.dataValues.order);
-      }
-    }
-    return context;
+    return await generateResult(ord, customer, seqClient, context);
   };
 };
 const prepOrder = () => {
