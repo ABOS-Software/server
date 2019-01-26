@@ -2,19 +2,19 @@
 // for more of what you can do here.
 const Sequelize = require('sequelize');
 const DataTypes = Sequelize.DataTypes;
+const definition = {
+  id: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    primaryKey: true,
+    autoIncrement: true
+  },
 
+
+};
 module.exports = function (app) {
   const sequelizeClient = app.get('sequelizeClient');
-  const schema = sequelizeClient.define('user_manager', {
-    id: {
-      type: DataTypes.BIGINT,
-      allowNull: false,
-      primaryKey: true,
-      autoIncrement: true
-    },
-
-
-  }, {
+  const schema = sequelizeClient.define('user_manager', definition, {
     tableName: 'user_manager',
     underscored: true,
   });
