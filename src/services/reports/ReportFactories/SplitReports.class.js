@@ -5,18 +5,7 @@ class SplitReports extends reportsService {
     super(options, app);
   }
 
-  async getCustomerYears(customers, inputs) {
-    let customerYrs = [];
-    let tCostT = 0.0;
-    let quantityT = 0;
-    for (const cust of customers) {
-      let custYr = await this.generateCustomerPage(cust, inputs);
-      tCostT += custYr.tCost;
-      quantityT += custYr.tQuant;
-      customerYrs.push(custYr.data);
-    }
-    return {totalCost: tCostT, quantityT: quantityT, customerYears: customerYrs};
-  }
+
   async generate(inputs) {
     const seqClient = this.app.get('sequelizeClient');
     const customersModel = seqClient.models['customers'];

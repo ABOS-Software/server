@@ -5,39 +5,7 @@ class CustomerYearReport extends reportsService {
     super(options, app);
   }
 
-  async generateCustomerObjects(inputs) {
-    const seqClient = this.app.get('sequelizeClient');
-    const customersModel = seqClient.models['customers'];
-    const {
-      user,
-      includeSubUsers,
-      customers,
-    } = inputs;
-    let customersGen = [];
-    for (const cust of customers) {
-      let custM;
-      let where = await this.getGeneralFilter('id', cust, inputs);
-      let options = await this.customerOptions(where);
-      custM = await customersModel.findOne(options);
-      if (custM) {
-        customersGen.push(custM);
-      }
-    }
-    return customersGen;
-  }
 
-  async getCustomerYears(customers, inputs) {
-    let customerYrs = [];
-    let tCostT = 0.0;
-    let quantityT = 0;
-    for (const cust of customers) {
-      let custYr = await this.generateCustomerPage(cust, inputs);
-      tCostT += custYr.tCost;
-      quantityT += custYr.tQuant;
-      customerYrs.push(custYr.data);
-    }
-    return {totalCost: tCostT, quantityT: quantityT, customerYears: customerYrs};
-  }
   async generate(inputs) {
     let data = {
       'customerYear': [],

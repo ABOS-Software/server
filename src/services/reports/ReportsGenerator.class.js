@@ -1,5 +1,24 @@
 const {HistoricalReports, CustomerYearReports, SplitReports, YearReport} = require('./ReportFactories/');
-
+const columns = [
+  {
+    'name': 'ID'
+  },
+  {
+    'name': 'Name'
+  },
+  {
+    'name': 'Unit Size'
+  },
+  {
+    'name': 'Unit Cost'
+  },
+  {
+    'name': 'Quantity'
+  },
+  {
+    'name': 'Extended Price'
+  }
+];
 class ReportsGenerator {
   constructor(options, app) {
     this.options = options || {};
@@ -15,7 +34,6 @@ class ReportsGenerator {
       scoutRank,
       scoutPhone,
       logoLoc,
-
     } = inputs;
 
     return {
@@ -31,26 +49,7 @@ class ReportsGenerator {
         'TotalQuantity': '0'
       },
       'splitting': '',
-      'column': [
-        {
-          'name': 'ID'
-        },
-        {
-          'name': 'Name'
-        },
-        {
-          'name': 'Unit Size'
-        },
-        {
-          'name': 'Unit Cost'
-        },
-        {
-          'name': 'Quantity'
-        },
-        {
-          'name': 'Extended Price'
-        }
-      ],
+      'column': columns,
 
     };
   }
@@ -131,20 +130,23 @@ class ReportsGenerator {
   }
 
   getCustomersArray(jsonParams) {
-    let customers = [];
-    if (jsonParams.Customer) {
-      if (jsonParams.Customer instanceof Array) {
-        for (const it of jsonParams.Customer) {
-          customers.push(it);
-        }
+    if (!jsonParams.Customer) {
+      return [];
 
-      } else {
-        customers.push(jsonParams.Customer);
-      }
     }
-    return customers;
+    if (jsonParams.Customer instanceof Array) {
+      return jsonParams.Customer;
+    } else {
+      return [jsonParams.Customer];
+    }
   }
 
+  setLogoLocation(jsonParams) {
+    if (!jsonParams.LogoLocation || !jsonParams.LogoLocation.base64) {
+      jsonParams.LogoLocation = {base64: ''};
+    }
+    return jsonParams;
+  }
 
   async generate(jsonParams) {
 
@@ -153,9 +155,7 @@ class ReportsGenerator {
     let {Splitting, fileName, Category, includeHeader} = await this.getTemplateMetaData(jsonParams);
     let formattedAddress = jsonParams.Scout_Town + ', ' + jsonParams.Scout_State + ' ' + jsonParams.Scout_Zip;
 
-    if (!jsonParams.LogoLocation || !jsonParams.LogoLocation.base64) {
-      jsonParams.LogoLocation = {base64: ''};
-    }
+    jsonParams = this.setLogoLocation(jsonParams);
     let options = {
       reportType: jsonParams.template,
       selectedYear: jsonParams.Year,

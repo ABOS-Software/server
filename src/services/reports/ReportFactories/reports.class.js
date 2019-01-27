@@ -59,6 +59,38 @@ module.exports = class reportsService {
     };
   }
 
+  async getCustomerYears(customers, inputs) {
+    let customerYrs = [];
+    let tCostT = 0.0;
+    let quantityT = 0;
+    for (const cust of customers) {
+      let custYr = await this.generateCustomerPage(cust, inputs);
+      tCostT += custYr.tCost;
+      quantityT += custYr.tQuant;
+      customerYrs.push(custYr.data);
+    }
+    return {totalCost: tCostT, quantityT: quantityT, customerYears: customerYrs};
+  }
+
+  async generateCustomerObjects(inputs) {
+    const seqClient = this.app.get('sequelizeClient');
+    const customersModel = seqClient.models['customers'];
+    const {
+
+      customers,
+    } = inputs;
+    let customersGen = [];
+    for (const cust of customers) {
+      let custM;
+      let where = await this.getGeneralFilter('id', cust, inputs);
+      let options = await this.customerOptions(where);
+      custM = await customersModel.findOne(options);
+      if (custM) {
+        customersGen.push(custM);
+      }
+    }
+    return customersGen;
+  }
   async getGeneralFilter(idkey, id, inputs) {
     const {
       user,
@@ -127,68 +159,94 @@ module.exports = class reportsService {
 
   }
 
-  async generateCustomerPage(cust, inputs, header = true) {
+  async getCategory(cust, inputs) {
     const seqClient = this.app.get('sequelizeClient');
     const categories = seqClient.models['categories'];
-    let tCost = 0.0;
-    let donation = 0.0;
-    let custYr = this.customerTemplate();
-    let orderArray = cust.order.orderedProducts;
     const {
-
       category,
-
-
       includeHeader,
     } = inputs;
-    const totalQuantity = orderArray.reduce((a, b) => {
-        return a + b.quantity;
-      }
-      , 0);
-    if (totalQuantity > 0) {
-      let cat;
-      if (includeHeader) {
-        cat = await categories.findOne({
-          where: {
-            category_name: category,
-            year_id: cust.year_id
-          }
-        });
-      }
-      custYr.custAddr = header;
-      custYr.name = cust.customer_name;
-      custYr.streetAddress = cust.street_address;
-      custYr.city = cust.city + ' ' + cust.state + ', ' + cust.zip_code;
-      custYr.header = true;
-      custYr.title = cust.customer_name + ' ' + cust.year.year + ' Order';
+    let cat;
+    if (includeHeader) {
+      cat = await categories.findOne({
+        where: {
+          category_name: category,
+          year_id: cust.year_id
+        }
+      });
+    }
+    return cat;
+  }
 
-      if (includeHeader && category !== 'All' && cat) {
+  getSpecialInfos(inputs, cat, cust) {
+    const {
+      category,
+      includeHeader,
+    } = inputs;
+    let specialInfo = [];
+    if (includeHeader && category !== 'All' && cat) {
 
-        custYr.specialInfo.push({text: '*Notice: These products will be delivered to your house on ' + cat.delivery_date.toLocaleDateString() + ('. Total paid to date: $' + cust.order.amount_paid)});
-
-      }
-      custYr.prodTable = true;
-
-      let pTable = await this.generateProductTable(orderArray, category);
-      tCost = pTable.totalCost;
-      custYr.Product = pTable.Product;
-      //quantityT += pTable.totalQuantity;
-      custYr.totalCost = tCost;
-      donation = cust.donation;
-      if (donation > 0) {
-        custYr.DonationThanks.push({text: 'Thank you for your $' + donation + ' donation '});
-        custYr.includeDonation = true;
-        custYr.Donation = donation;
-        custYr.GrandTotal = tCost + donation;
-      }
-
-      return {tCost: tCost + donation, tQuant: pTable.totalQuantity, data: custYr};
+      specialInfo.push({text: '*Notice: These products will be delivered to your house on ' + cat.delivery_date.toLocaleDateString() + ('. Total paid to date: $' + cust.order.amount_paid)});
 
     }
+    return specialInfo;
+  }
+
+  getDonationFields(custYr, donation) {
+    if (donation > 0) {
+      custYr.DonationThanks.push({text: 'Thank you for your $' + donation + ' donation '});
+      custYr.includeDonation = true;
+      custYr.Donation = donation;
+      custYr.GrandTotal = custYr.totalCost + donation;
+    }
+    return custYr;
+  }
+
+  getCustomerMetaFields(cust, custYr) {
+    custYr.name = cust.customer_name;
+    custYr.streetAddress = cust.street_address;
+    custYr.city = cust.city + ' ' + cust.state + ', ' + cust.zip_code;
+    custYr.header = true;
+    custYr.title = cust.customer_name + ' ' + cust.year.year + ' Order';
+    custYr.prodTable = true;
+
+    return custYr;
+  }
+
+  async getCustomerProductData(cust, custYr, inputs) {
+    let orderArray = cust.order.orderedProducts;
+    const {
+      category,
+    } = inputs;
+    let pTable = await this.generateProductTable(orderArray, category);
+    let tCost = pTable.totalCost;
+    custYr.Product = pTable.Product;
+    //quantityT += pTable.totalQuantity;
+    let donation = cust.donation;
+    custYr.totalCost = tCost;
+    custYr = this.getDonationFields(custYr, donation);
+    return {tCost: tCost + donation, tQuant: pTable.totalQuantity, data: custYr};
+
+  }
+
+  doesCustomerHaveProducts(cust) {
+    let orderArray = cust.order.orderedProducts;
+    const totalQuantity = orderArray.reduce((a, b) => {
+      return a + b.quantity;
+    }, 0);
+    return (totalQuantity > 0);
+  }
+
+  async generateCustomerPage(cust, inputs, header = true) {
+    let custYr = this.customerTemplate();
+    if (this.doesCustomerHaveProducts(cust)) {
+      let cat = await this.getCategory(cust, inputs);
+      custYr.custAddr = header;
+      custYr = this.getCustomerMetaFields(cust, custYr);
+      custYr.specialInfo = this.getSpecialInfos(inputs, cat, cust);
+      return this.getCustomerProductData(cust, custYr, inputs);
+    }
     return {tCost: 0, tQuant: 0, data: custYr};
-
-    //  tCostT += tCost + donation;
-
 
   }
 

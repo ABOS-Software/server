@@ -5,25 +5,7 @@ class HistoricalReports extends reportsService {
     super(options, app);
   }
 
-  async generateCustomerObjects(inputs) {
-    const seqClient = this.app.get('sequelizeClient');
-    const customersModel = seqClient.models['customers'];
-    const {
 
-      customers,
-    } = inputs;
-    let customersGen = [];
-    for (const cust of customers) {
-      let custM;
-      let where = await this.getGeneralFilter('id', cust, inputs);
-      let options = await this.customerOptions(where);
-      custM = await customersModel.findOne(options);
-      if (custM) {
-        customersGen.push(custM);
-      }
-    }
-    return customersGen;
-  }
 
   async getCustomerYears(customers, inputs, customerYrs) {
     let header = true;
