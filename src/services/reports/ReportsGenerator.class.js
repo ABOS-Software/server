@@ -92,13 +92,10 @@ class ReportsGenerator {
   async getTemplateMetaData(jsonParams) {
     const seqClient = this.app.get('sequelizeClient');
     const year = seqClient.models['year'];
-
-    let Splitting = '';
     let fileName = 'report.pdf';
     let Category = jsonParams.Category || 'All';
     let yearObj = await year.findByPk(jsonParams.Year);
     let yearText = yearObj.year;
-    let includeHeader = jsonParams.Print_Due_Header;
 
     switch (jsonParams.template) {
       case 'customers_split':
@@ -118,7 +115,7 @@ class ReportsGenerator {
           includeHeader: false
         };
     }
-    return {splitting: Splitting, fileName: fileName, Category: Category, includeHeader: includeHeader};
+    return {splitting: '', fileName: fileName, Category: Category, includeHeader: jsonParams.Print_Due_Header};
   }
 
   getCustomersArray(jsonParams) {

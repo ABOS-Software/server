@@ -1,4 +1,3 @@
-// Initializes the `reports` service on path `/reports`
 const logger = require('../../logger');
 
 const auth = require('@feathersjs/authentication');
@@ -17,6 +16,15 @@ const jsReportTemplate = {
     marginRight: '0.5in',
   }
 };
+const writeResponse = (data, resp, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'application/pdf',
+    'Content-Disposition': 'attachment; filename=' + data.fileName,
+    'Content-Length': resp.content.length,
+    'Access-Control-Expose-Headers': 'Content-Disposition'
+  });
+  res.end(resp.content);
+};
 const reportsMiddleware = (app) => {
   return async (req, res) => {
     const paginate = app.get('paginate');
@@ -34,13 +42,7 @@ const reportsMiddleware = (app) => {
         data: data.data
       }).then((resp) => {
 
-        res.writeHead(200, {
-          'Content-Type': 'application/pdf',
-          'Content-Disposition': 'attachment; filename=' + data.fileName,
-          'Content-Length': resp.content.length,
-          'Access-Control-Expose-Headers': 'Content-Disposition'
-        });
-        res.end(resp.content);
+        writeResponse(data, resp, res);
         return '';
       }).catch(e => {
         logger.error(e);
