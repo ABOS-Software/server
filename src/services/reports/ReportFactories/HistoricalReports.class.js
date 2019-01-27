@@ -5,80 +5,83 @@ class HistoricalReports extends reportsService {
     super(options, app);
   }
 
-  async generate(inputs) {
+  async generateCustomerObjects(inputs) {
     const seqClient = this.app.get('sequelizeClient');
     const customersModel = seqClient.models['customers'];
-
-
     const {
-      selectedYear,
 
-      user,
-      includeSubUsers,
-
+      customers,
     } = inputs;
+    let customersGen = [];
+    for (const cust of customers) {
+      let custM;
+      let where = await this.getGeneralFilter('id', cust, inputs);
+      let options = await this.customerOptions(where);
+      custM = await customersModel.findOne(options);
+      if (custM) {
+        customersGen.push(custM);
+      }
+    }
+    return customersGen;
+  }
 
+  async getCustomerYears(customers, inputs, customerYrs) {
+    let header = true;
+
+    let tCostT = 0.0;
+    let quantityT = 0;
+    for (const cust of customers) {
+      let custYr = await this.generateCustomerPage(cust, inputs, header);
+      header = false;
+      tCostT += custYr.tCost;
+      quantityT += custYr.tQuant;
+      customerYrs.push(custYr.data);
+    }
+    return {totalCost: tCostT, quantityT: quantityT, customerYears: customerYrs};
+  }
+
+  async generateCustomerHistory(customer, inputs, customerYrs) {
+    const seqClient = this.app.get('sequelizeClient');
+    const customersModel = seqClient.models['customers'];
+    let where = await this.getGeneralFilter('customer_name', customer.customer_name, inputs);
+
+    //  let catWhere = {};
+    let options = await this.customerOptions(where);
+
+    let customers = await customersModel.findAll(options);
+
+    return await this.getCustomerYears(customers, inputs, customerYrs);
+
+
+  }
+
+  async generateAllHistories(customers, inputs) {
+    let tCostT = 0.0;
+    let quantityTR = 0;
+    let customerYrs = [];
+
+    for (const customer of customers) {
+      let {totalCost, quantityT, customerYears} = await this.generateCustomerHistory(customer, inputs, customerYrs);
+      tCostT += totalCost;
+      quantityTR += quantityT;
+      customerYrs = customerYears;
+    }
+    return {totalCost: tCostT, quantityT: quantityTR, customerYears: customerYrs};
+
+  }
+  async generate(inputs) {
     let data = {
-
       'customerYear': []
     };
-
-    let customersGen = [];
-    try {
-      for (const cust of inputs.customers) {
-        let custM;
-        if (includeSubUsers) {
-          custM = await customersModel.findOne({
-            where: {id: cust, user_id: await this.returnManagedUserFilter(user, selectedYear)}
-          });
-        } else {
-          custM = await customersModel.findOne({
-            where: {id: cust, user_id: user}
-          });
-        }
-        if (custM) {
-          customersGen.push(custM);
-        }
-
-      }
-      if (customersGen.length < 1) {
-        return this.emptyReturn();
-      }
-      let tCostT = 0.0;
-      let quantityT = 0;
-      for (const customer of customersGen) {
-        let header = true;
-
-        let where = {customer_name: customer.customer_name, user_id: user};
-
-        if (includeSubUsers) {
-          where = {
-            customer_name: customer.customer_name,
-            user_id: await this.returnManagedUserFilter(user, selectedYear)
-          };
-
-        }
-        //  let catWhere = {};
-        let options = await this.customerOptions(where);
-
-        let customers = await customersModel.findAll(options);
-
-
-        for (const cust of customers) {
-
-          let custYr = await this.generateCustomerPage(cust, inputs, header);
-          header = false;
-
-          tCostT += custYr.tCost;
-          quantityT += custYr.tQuant;
-          data.customerYear.push(custYr.data);
-        }
-      }
-      data.totalCost = tCostT;
-      data.totalQuantity = quantityT;
-    } catch (e) {
-      console.error(e);
+    let customersGen = await this.generateCustomerObjects(inputs);
+    if (customersGen.length < 1) {
+      return this.emptyReturn();
     }
+    let {totalCost, quantityT, customerYears} = await this.generateAllHistories(customersGen, inputs);
+    data.customerYear = customerYears;
+    data.totalCost = totalCost;
+    data.totalQuantity = quantityT;
+
 
     return data;
   }
