@@ -1,12 +1,15 @@
 // Initializes the `reports` service on path `/reports`
 
 const auth = require('@feathersjs/authentication');
-const reportsService = require('./reports.class');
+const ReportsGenerator = require('./ReportsGenerator.class');
 
 const template = require('./Reports.js');
+
+
 module.exports = function (app) {
 
   const paginate = app.get('paginate');
+  1;
 
   const options = {
     paginate
@@ -17,8 +20,8 @@ module.exports = function (app) {
   // Initialize our service with any options it requires
   app.use('/reports', auth.express.authenticate('jwt'), async function (req, res, next) {
     try {
-      let repServ = new reportsService(options, app);
-      let data = await repServ.generate(req.body);
+      let generator = new ReportsGenerator(options, app);
+      let data = await generator.generate(req.body);
 
 
       const jsreport = app.get('jsreport');
