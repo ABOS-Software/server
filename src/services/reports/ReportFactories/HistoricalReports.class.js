@@ -42,12 +42,7 @@ class HistoricalReports extends reportsService {
 
       }
       if (customersGen.length < 1) {
-        return {
-
-          'customerYear': [],
-          totalCost: 0.0,
-          totalQuantity: 0
-        };
+        return this.emptyReturn();
       }
       let tCostT = 0.0;
       let quantityT = 0;

@@ -50,8 +50,21 @@ module.exports = class reportsService {
     };
   }
 
+  emptyReturn() {
+    return {
 
-  async getGeneralFilter(idkey, id, user, includeSubUsers) {
+      'customerYear': [],
+      totalCost: 0.0,
+      totalQuantity: 0
+    };
+  }
+
+  async getGeneralFilter(idkey, id, inputs) {
+    const {
+      user,
+      includeSubUsers,
+      selectedYear,
+    } = inputs;
     let where = {[idkey]: id, user_id: user};
     if (includeSubUsers) {
       where = {[idkey]: id, user_id: await this.returnManagedUserFilter(user, selectedYear)};

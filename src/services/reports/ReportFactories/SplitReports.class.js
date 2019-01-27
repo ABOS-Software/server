@@ -28,7 +28,7 @@ class SplitReports extends reportsService {
     let data = {
       'customerYear': []
     };
-    let where = await this.getGeneralFilter('year_id', selectedYear, user, includeSubUsers);
+    let where = await this.getGeneralFilter('year_id', selectedYear, inputs);
 
     let customers = await customersModel.findAll(await this.customerOptions(where));
     let {totalCost, quantityT, customerYears} = await this.getCustomerYears(customers, inputs);
