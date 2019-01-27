@@ -116,12 +116,7 @@ const saveOrder = () => {
     return await generateResult(ord, customer, seqClient, context);
   };
 };
-const updateCustomer = (customer, usr, update) => {
-  customer.user_name = usr.username;
-  customer.customer_name = customer.customerName;
-  customer.street_address = customer.streetAddress;
-  customer.latitude = 0;
-  customer.longitude = 0;
+const updateCustomerOrderedProducts = (customer, usr, update) => {
   let ops = [];
   customer.order.orderedProducts.forEach(op => {
     op.extended_cost = op.extendedCost;
@@ -139,6 +134,17 @@ const updateCustomer = (customer, usr, update) => {
     ops.push(op);
   });
   customer.order.orderedProducts = ops;
+  return customer;
+};
+const updateCustomer = (customer, usr, update) => {
+  customer.user_name = usr.username;
+  customer.customer_name = customer.customerName;
+  customer.street_address = customer.streetAddress;
+  customer.latitude = 0;
+  customer.longitude = 0;
+
+  customer = updateCustomerOrderedProducts(customer, usr, update);
+
   customer.order.user_name = usr.username;
   if (update) {
     customer.order.user = usr;
@@ -197,28 +203,39 @@ const calcProductCosts = (orderArray) => {
   return ops;
 
 };
+const calcProductCostsMultiple = (customersD) => {
+  let customers = [];
+
+  customersD.forEach(cust => {
+    if (cust.dataValues.order) {
+      cust.dataValues.order.dataValues.orderedProducts = calcProductCosts(cust.dataValues.order);
+    }
+    customers.push(cust);
+
+  });
+  return customers;
+};
+const arrayContext = (context) => {
+  if (!context.result.data) {
+    return [context.result];
+  } else {
+    return context.result.data;
+  }
+
+};
+const deArrayContext = (customers, context) => {
+  if (!context.result.data) {
+    context.result = customers[0];
+  } else {
+    context.result.data = customers;
+  }
+  return context;
+};
 const calcProductCostsHook = () => {
   return async context => {
-    let customersD = [];
-    let customers = [];
-    if (!context.result.data) {
-      customersD = [context.result];
-    } else {
-      customersD = context.result.data;
-    }
-    customersD.forEach(cust => {
-      if (cust.dataValues.order) {
-        cust.dataValues.order.dataValues.orderedProducts = calcProductCosts(cust.dataValues.order);
-      }
-      customers.push(cust);
-
-    });
-    if (!context.result.data) {
-      context.result = customers[0];
-    } else {
-      context.result.data = customers;
-    }
-    return context;
+    let customersD = arrayContext(context);
+    let customers = calcProductCostsMultiple(customersD);
+    return deArrayContext(customers, context);
   };
 };
 

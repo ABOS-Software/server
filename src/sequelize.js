@@ -65,7 +65,8 @@ const getConfigSequelizeInstance = (connectionDetails, logging) => {
 };
 const getLogger = (connectionDetails) => {
   if (connectionDetails.logging) {
-    return logger.debug;
+    // eslint-disable-next-line no-console
+    return console.log;
   } else {
     return false;
   }
@@ -74,8 +75,8 @@ const getSequelizeInstance = (app) => {
   const connectionDetails = app.get('mysql');
   let dbURL = process.env.DATABASE_URL || connectionDetails.URL;
   let sequelize;
-  let logging = getLogger(connectionDetails);
 
+  let logging = getLogger(connectionDetails, logger);
   logger.debug(dbURL);
   try {
     if (dbURL) {

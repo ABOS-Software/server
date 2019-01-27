@@ -2,11 +2,10 @@ const createService = require('feathers-sequelize');
 
 module.exports = {
 
-  registerDbService: function (app, Model, name, hooks, url) {
+  registerDbService: function (app, Model, name, hooks) {
+    let url = '/' + name;
     const paginate = app.get('paginate');
-    if (!url) {
-      url = '/' + name;
-    }
+
 
     const serviceOptions = app.get('serviceOptions');
     let options = {
@@ -30,11 +29,10 @@ module.exports = {
 
     service.hooks(hooks);
   },
-  registerService: function (app, initializer, name, hooks, url) {
+  registerService: function (app, initializer, name, hooks) {
     const paginate = app.get('paginate');
-    if (!url) {
-      url = '/' + name;
-    }
+    let url = '/' + name;
+
 
     const serviceOptions = app.get('serviceOptions');
     let options = {

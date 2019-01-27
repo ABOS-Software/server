@@ -102,29 +102,21 @@ class ReportsGenerator {
 
     switch (jsonParams.template) {
       case 'customers_split':
-        Splitting = '';
         fileName = yearText + '_customer_orders_' + Category + '.pdf';
         break;
-
       case 'Year Totals':
-        Splitting = '';
         fileName = yearText + '_Total_Orders_' + Category + '.pdf';
-
         break;
-
       case 'Customer Year Totals':
-
-        Splitting = '';
         fileName = 'Individual_' + yearText + '_Order_' + Category + '.pdf';
-
         break;
-
       case 'Customer All-Time Totals':
-        Splitting = 'Year:';
-        fileName = 'Individual_historical_orders.pdf';
-        Category = 'All';
-        includeHeader = false;
-        break;
+        return {
+          splitting: 'Year:',
+          fileName: 'Individual_historical_orders.pdf',
+          Category: 'All',
+          includeHeader: false
+        };
     }
     return {splitting: Splitting, fileName: fileName, Category: Category, includeHeader: includeHeader};
   }
