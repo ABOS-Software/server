@@ -1,53 +1,26 @@
 const {ValidationError} = require('sequelize');
-const {productsInc} = require('../../models/includes');
+const {ordersInc, yearInc} = require('../../models/includes');
 
-const {ordersAttr, customerAttr, orderedProductsAttr, yearAttr, userAttr, productsAttr} = require('../../models/attributes');
+const {customerAttr, userAttr} = require('../../models/attributes');
 const {authenticate} = require('@feathersjs/authentication').hooks;
 const checkPermissions = require('../../hooks/check-permissions');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
 const makeOptions = (sequelize, yearVal) => {
-
-  // Get the Sequelize instance. In the generated application via:
-  const orderedProducts = sequelize.models['ordered_products'];
-  const categories = sequelize.models['categories'];
-
-  const orders = sequelize.models['orders'];
-  const products = sequelize.models['products'];
-
-
   const user = sequelize.models['user'];
-
-  const year = sequelize.models['year'];
-  let yrInc = {model: year, attributes: yearAttr};
+  let yrInc = yearInc(sequelize);
   if (yearVal) {
     yrInc.where = {id: yearVal};
-
   }
-
-
   return {
     include: [yrInc, {
       model: user,
       attributes: userAttr
-    }, {
-      model: orders,
-      attributes: ordersAttr,
-      include: [{
-        model: orderedProducts,
-        attributes: orderedProductsAttr,
-        include: [productsInc(sequelize), {model: year, attributes: yearAttr}],
-        as: 'orderedProducts'
-      }, {model: year, attributes: yearAttr}],
-      as: 'order'
-    }],
+    }, ordersInc(sequelize)],
     attributes: customerAttr,
   };
-
-
 };
 const sequelizeParams = () => {
   return async context => {
-    // Get the Sequelize instance. In the generated application via:
     const sequelize = context.app.get('sequelizeClient');
 
     let yearVal = null;
@@ -143,26 +116,64 @@ const saveOrder = () => {
     return await generateResult(ord, customer, seqClient, context);
   };
 };
+const updateCustomer = (customer, usr, update) => {
+  customer.user_name = usr.username;
+  customer.customer_name = customer.customerName;
+  customer.street_address = customer.streetAddress;
+  customer.latitude = 0;
+  customer.longitude = 0;
+  let ops = [];
+  customer.order.orderedProducts.forEach(op => {
+    op.extended_cost = op.extendedCost;
+    op.user_name = usr.username;
+    op.products_id = op.products.id;
+
+    if (update) {
+      op.user = usr;
+
+    } else {
+      op.user_id = customer.user;
+      op.year_id = customer.year;
+    }
+
+    ops.push(op);
+  });
+  customer.order.orderedProducts = ops;
+  customer.order.user_name = usr.username;
+  if (update) {
+    customer.order.user = usr;
+
+  } else {
+    customer.order.user_id = customer.user;
+    customer.order.year_id = customer.year;
+  }
+
+
+  customer.order.amount_paid = customer.order.amountPaid;
+  return customer;
+};
+const orderSequelizeOptions = (sequelize) => {
+  const orderedProducts = sequelize.models['ordered_products'];
+  const orders = sequelize.models['orders'];
+  return {
+    include: [{
+      model: orders,
+      as: 'order',
+      include: [{
+        model: orderedProducts,
+        as: 'orderedProducts'
+      }],
+
+    }],
+  };
+};
 const prepOrder = () => {
   return async context => {
     const sequelize = context.app.get('sequelizeClient');
     let update = context.method === 'update';
-    // const seqClient = context.app.get('sequelizeClient');
-    //   const orders = seqClient.models['orders'];
-    const orderedProducts = sequelize.models['ordered_products'];
-    const orders = sequelize.models['orders'];
-
     const user = sequelize.models['user'];
-
-    //BadRequest: notNull Violation: customers.version cannot be null,
-    // notNull Violation: customers.user_name cannot be null,
-    // notNull Violation: customers.customer_name cannot be null,
-    // notNull Violation: customers.street_address cannot be null,
-    // notNull Violation: customers.latitude cannot be null,
-    // notNull Violation: customers.longitude cannot be null
     let customer = context.data;
     let usr;
-
     if (update) {
       usr = await user.findByPk(customer.user.id);
     } else {
@@ -170,65 +181,45 @@ const prepOrder = () => {
       customer.user_id = customer.user;
       customer.year_id = customer.year;
     }
-    customer.user_name = usr.username;
-    customer.customer_name = customer.customerName;
-    customer.street_address = customer.streetAddress;
-    customer.latitude = 0;
-    customer.longitude = 0;
-    let ops = [];
-    customer.order.orderedProducts.forEach(op => {
-      op.extended_cost = op.extendedCost;
-      op.user_name = usr.username;
-      op.products_id = op.products.id;
-
-      if (update) {
-        op.user = usr;
-
-      } else {
-        op.user_id = customer.user;
-        op.year_id = customer.year;
-      }
-
-      ops.push(op);
-    });
-    customer.order.orderedProducts = ops;
-    customer.order.user_name = usr.username;
-    if (update) {
-      customer.order.user = usr;
-
-    } else {
-      customer.order.user_id = customer.user;
-      customer.order.year_id = customer.year;
-    }
-
-    customer.order.amount_paid = customer.order.amountPaid;
-    context.data = customer;
-    context.params.sequelize = {
-      include: [{
-        model: orders,
-        as: 'order',
-        include: [{
-          model: orderedProducts,
-          as: 'orderedProducts'
-        }],
-
-      }],
-    };
+    context.data = updateCustomer(customer, usr, update);
+    context.params.sequelize = orderSequelizeOptions(sequelize);
     return context;
   };
 };
 const calcProductCosts = (orderArray) => {
   let ops = [];
 
-  if (orderArray) {
 
-    orderArray.dataValues.orderedProducts.forEach(op => {
-      op.dataValues.extendedCost = op.dataValues.quantity * op.products.dataValues.unitCost;
-      ops.push(op);
-    });
-  }
+  orderArray.dataValues.orderedProducts.forEach(op => {
+    op.dataValues.extendedCost = op.dataValues.quantity * op.products.dataValues.unitCost;
+    ops.push(op);
+  });
   return ops;
 
+};
+const calcProductCostsHook = () => {
+  return async context => {
+    let customersD = [];
+    let customers = [];
+    if (!context.result.data) {
+      customersD = [context.result];
+    } else {
+      customersD = context.result.data;
+    }
+    customersD.forEach(cust => {
+      if (cust.dataValues.order) {
+        cust.dataValues.order.dataValues.orderedProducts = calcProductCosts(cust.dataValues.order);
+      }
+      customers.push(cust);
+
+    });
+    if (!context.result.data) {
+      context.result = customers[0];
+    } else {
+      context.result.data = customers;
+    }
+    return context;
+  };
 };
 
 // const seqClient = app.get('sequelizeClient');
@@ -248,27 +239,8 @@ module.exports = {
 
   after: {
     all: [],
-    find(context) {
-      let customers = [];
-
-      context.result.data.forEach(cust => {
-        if (cust.dataValues.order) {
-          cust.dataValues.order.dataValues.orderedProducts = calcProductCosts(cust.dataValues.order);
-        }
-        customers.push(cust);
-
-      });
-      context.result.data = customers;
-      return context;
-    },
-    get(context) {
-
-      if (context.result.dataValues.order) {
-        context.result.dataValues.order.dataValues.orderedProducts = calcProductCosts(context.result.dataValues.order);
-      }
-      return context;
-
-    },
+    find: [calcProductCostsHook()],
+    get: [calcProductCostsHook()],
     update: [saveOrder()],
     create: [saveOrder()],
     patch: [],

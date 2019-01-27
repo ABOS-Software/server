@@ -48,19 +48,7 @@ const getSequelizeInstance = (app) => {
   }
   console.log(dbURL);
   try {
-    if (app.get('env') === 'test' && dbURL !== '') {
-      console.log(dbURL);
-      sequelize = new Sequelize(dbURL, {
-        dialect: 'mysql',
-        dialectOptions: connectionDetails.dialectOptions,
-
-        logging: logging,
-        operatorsAliases,
-        define: {
-          freezeTableName: true
-        },
-      });
-    } else if (dbURL) {
+    if (dbURL) {
       sequelize = new Sequelize(dbURL, {
         dialect: 'mysql',
         dialectOptions: connectionDetails.dialectOptions,

@@ -52,9 +52,9 @@ const resolveContext = context => {
 module.exports = function (roleParam) {
 
   return async context => {
-    let valid = checkRequirements(context, roleParam);
-    if (valid) {
-      return valid;
+    let escaped = checkRequirements(context, roleParam);
+    if (escaped) {
+      return resolveContext(context);
     }
     const roleRequired = roleParam[0];
     const sequelize = context.app.get('sequelizeClient');

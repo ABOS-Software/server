@@ -61,6 +61,12 @@ module.exports = function (options = {}) {
           throw new BadRequest('Invalid User ID');
           //        console.log(context);
         }
+      } else if (context.method === 'update') {
+
+        if (!userIds.includes(context.data[field])) {
+          throw new BadRequest('Invalid User ID');
+          //        console.log(context);
+        }
       } else {
         if (!userIds.includes(context.data[createField])) {
           throw new BadRequest('Invalid User ID');
