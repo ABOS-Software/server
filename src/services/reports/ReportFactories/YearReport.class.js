@@ -24,13 +24,7 @@ class YearReport extends reportsService {
     return catWhere;
   }
 
-  async getOrderedProductsWhere(selectedYear, user, includeSubUsers) {
-    let where = {year_id: selectedYear, user_id: user};
-    if (includeSubUsers) {
-      where = {year_id: selectedYear, user_id: await this.returnManagedUserFilter(user, selectedYear)};
-    }
-    return where;
-  }
+
 
   async getOrderedProducts(inputs) {
     const {
@@ -45,7 +39,7 @@ class YearReport extends reportsService {
     const products = seqClient.models['products'];
     let cat = await this.getCategory(category, selectedYear);
     let catWhere = this.getCategoryWhere(category, cat);
-    let where = await this.getOrderedProductsWhere(selectedYear, user, includeSubUsers);
+    let where = await this.getGeneralFilter('year_id', selectedYear, user, includeSubUsers);
     return await orderedProducts.findAll({
       where: where,
       attributes: [[seqClient.fn('sum', seqClient.col('ordered_products.quantity')), 'quantity'], [seqClient.fn('sum', seqClient.col('ordered_products.extended_cost')), 'extended_cost']],

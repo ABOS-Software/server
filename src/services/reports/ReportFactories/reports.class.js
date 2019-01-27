@@ -51,6 +51,13 @@ module.exports = class reportsService {
   }
 
 
+  async getGeneralFilter(idkey, id, user, includeSubUsers) {
+    let where = {[idkey]: id, user_id: user};
+    if (includeSubUsers) {
+      where = {[idkey]: id, user_id: await this.returnManagedUserFilter(user, selectedYear)};
+    }
+    return where;
+  }
   async returnManagedUserFilter(user, year) {
     const sequelize = this.app.get('sequelizeClient');
     const user_manager = sequelize.models['user_manager'];

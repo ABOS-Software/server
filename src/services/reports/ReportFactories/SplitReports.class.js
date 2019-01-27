@@ -5,48 +5,36 @@ class SplitReports extends reportsService {
     super(options, app);
   }
 
+  async getCustomerYears(customers, inputs) {
+    let customerYrs = [];
+    let tCostT = 0.0;
+    let quantityT = 0;
+    for (const cust of customers) {
+      let custYr = await this.generateCustomerPage(cust, inputs);
+      tCostT += custYr.tCost;
+      quantityT += custYr.tQuant;
+      customerYrs.push(custYr.data);
+    }
+    return {totalCost: tCostT, quantityT: quantityT, customerYears: customerYrs};
+  }
   async generate(inputs) {
     const seqClient = this.app.get('sequelizeClient');
     const customersModel = seqClient.models['customers'];
-
-
     const {
       selectedYear,
       user,
       includeSubUsers,
     } = inputs;
-
     let data = {
-
       'customerYear': []
     };
-    try {
+    let where = await this.getGeneralFilter('year_id', selectedYear, user, includeSubUsers);
 
-      let where = {year_id: selectedYear, user_id: user};
-      if (includeSubUsers) {
-        where = {year_id: selectedYear, user_id: await this.returnManagedUserFilter(user, selectedYear)};
-
-      }
-      let customers = await customersModel.findAll(await this.customerOptions(where));
-      let tCostT = 0.0;
-      let quantityT = 0;
-
-      for (const cust of customers) {
-
-        let custYr = await this.generateCustomerPage(cust, inputs);
-
-        tCostT += custYr.tCost;
-        quantityT += custYr.tQuant;
-        data.customerYear.push(custYr.data);
-
-
-      }
-      data.totalCost = tCostT;
-      data.totalQuantity = quantityT;
-    } catch (e) {
-      console.error(e);
-    }
-
+    let customers = await customersModel.findAll(await this.customerOptions(where));
+    let {totalCost, quantityT, customerYears} = await this.getCustomerYears(customers, inputs);
+    data.customerYear = customerYears;
+    data.totalCost = totalCost;
+    data.totalQuantity = quantityT;
     return data;
   }
 
