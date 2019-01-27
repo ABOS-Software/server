@@ -5,10 +5,36 @@ class Service {
     this.app = app;
   }
 
+  async generateUserElement(u, users, yr) {
+    const seqClient = this.app.get('sequelizeClient');
+    const user = seqClient.models['user'];
+    const userYear = seqClient.models['user_year'];
+    const year = seqClient.models['year'];
+    let subUsers = await this.definesubUsers(users, u, yr);
+    let userYr = this.setUserYr(u.user_years[0]);
+
+    let enabledYear = await userYear.findOne({
+      where: {user_id: u.id, status: 'ENABLED'},
+      attributes: ['year_id']
+    });
+    if (!enabledYear) {
+      enabledYear = -1;
+    } else {
+      enabledYear = enabledYear.year_id;
+    }
+    return {
+      id: u.id,
+      fullName: u.full_name,
+      group: userYr.group_id,
+      subUsers: subUsers,
+      status: userYr.status,
+      enabledYear: enabledYear
+    };
+  }
+
   async find(params) {
     const seqClient = this.app.get('sequelizeClient');
     const user = seqClient.models['user'];
-    const userManager = seqClient.models['user_manager'];
     const userYear = seqClient.models['user_year'];
     const year = seqClient.models['year'];
     let yr = await year.findByPk(params.query.year);
@@ -21,26 +47,8 @@ class Service {
 
 
     for (const u of users) {
-      let subUsers = await this.definesubUsers(users, u, yr);
-      let userYr = this.setUserYr(u.user_years[0]);
 
-      let enabledYear = await userYear.findOne({
-        where: {user_id: u.id, status: 'ENABLED'},
-        attributes: ['year_id']
-      });
-      if (!enabledYear) {
-        enabledYear = -1;
-      } else {
-        enabledYear = enabledYear.year_id;
-      }
-      usersList[u.username] = {
-        id: u.id,
-        fullName: u.full_name,
-        group: userYr.group_id,
-        subUsers: subUsers,
-        status: userYr.status,
-        enabledYear: enabledYear
-      };
+      usersList[u.username] = await this.generateUserElement(u, users, yr);
 
 
     }
@@ -101,32 +109,29 @@ class Service {
   async get(id, params) {
   }
 
-  async userStatus(enabledYear, currentStatus, year, uId) {
+  async switchEnabledtoArchived(uId) {
     const seqClient = this.app.get('sequelizeClient');
 
     const userYear = seqClient.models['user_year'];
-    let status = '';
-    if (enabledYear !== -1) {
-      if (year.id !== enabledYear) {
-        if (currentStatus === 'ENABLED') {
-          status = 'ARCHIVED';
-        }
-      } else {
+    let enabledUsers = await userYear.findAll({where: {user_id: uId, status: 'ENABLED'}});
+    for (let enabledU of enabledUsers) {
+      enabledU.status = 'ARCHIVED';
+      await enabledU.save();
 
-        let enabledUsers = await userYear.findAll({where: {user_id: uId, status: 'ENABLED'}});
-        for (let enabledU of enabledUsers) {
-          enabledU.status = 'ARCHIVED';
-          await enabledU.save();
+    }
+  }
 
-        }
-        status = 'ENABLED';
+  async userStatus(enabledYear, currentStatus, year, uId) {
+
+    let status = currentStatus;
+    if ((enabledYear === -1 || year.id !== enabledYear) && currentStatus === 'ENABLED') {
+      status = 'ARCHIVED';
+    } else if (enabledYear !== -1) {
+
+      await this.switchEnabledtoArchived(uId);
+      status = 'ENABLED';
 
 
-      }
-    } else {
-      if (currentStatus === 'ENABLED') {
-        status = 'ARCHIVED';
-      }
     }
     return status;
   }
@@ -148,31 +153,30 @@ class Service {
   }
 
   async setSubUsers(userObj, year, user, usersM) {
-    const seqClient = this.app.get('sequelizeClient');
-    const userM = seqClient.models['user'];
-    const userManager = seqClient.models['user_manager'];
-    const userYear = seqClient.models['user_year'];
-    //   log.debug(jsonParams.toString());
-    let managed = await this.getManagedList(user, year);
+
 
     for (const suK of Object.keys(userObj.subUsers)) {
       const su = userObj.subUsers[suK];
       let subUser = usersM.get(suK);
+      await this.setSubUser(user, su, year, subUser);
 
-      // UserManager.findOrSaveByManageAndUser(user, subUser)
 
-      if (su.checked) {
-        await userManager.findOrCreate({where: {manage_id: user.id, user_id: subUser.id, year_id: year.id}});
+    }
+  }
 
-      } else {
-        let uM = managed.get(subUser.id);
-        if (uM) {
-          await uM.destroy();
-          //uM.save()
-        }
+  async setSubUser(user, su, year, subUser) {
+    const seqClient = this.app.get('sequelizeClient');
+    const userManager = seqClient.models['user_manager'];
+    let managed = await this.getManagedList(user, year);
+    if (su.checked) {
+      await userManager.findOrCreate({where: {manage_id: user.id, user_id: subUser.id, year_id: year.id}});
+
+    } else {
+      let uM = managed.get(subUser.id);
+      if (uM) {
+        await uM.destroy();
+        //uM.save()
       }
-
-
     }
   }
 

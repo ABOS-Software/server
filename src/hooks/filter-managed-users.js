@@ -3,13 +3,75 @@
 
 // eslint-disable-next-line no-unused-vars
 const {Forbidden, BadRequest} = require('@feathersjs/errors');
+const getYear = (context) => {
+  let year = 1;
 
+  if (context.params.query.year) {
+    year = context.params.query.year;
+  } else if (context.params.query.year_id) {
+    year = context.params.query.year_id;
+  } else if (context.params.user.enabledYear) {
+    year = context.params.user.enabledYear;
+  }
+  return year;
+};
+const getUMs = async (context, field) => {
+  const sequelize = context.app.get('sequelizeClient');
+  const user_manager = sequelize.models['user_manager'];
+  let year = getYear(context);
+  let uM = [];
+  if (!context.params.query[field] || context.params.query.includeSub === 'true') {
+    uM = await user_manager.findAll({
+      where: {manage_id: context.params.payload.userId, year_id: year}
+
+    });
+  } else {
+    uM = await user_manager.findAll({
+      where: {manage_id: context.params.payload.userId, user_id: context.params.query[field], year_id: year}
+
+    });
+  }
+  return uM;
+};
+const checkIncludes = (userId, userIds) => {
+  if (!userIds.includes(userId)) {
+    throw new BadRequest('Invalid User ID');
+    //        console.log(context);
+  }
+};
+const getUserIds = (userManagers) => {
+  let userIds = [];
+  for (const manageEntry of userManagers) {
+    userIds.push(manageEntry.user_id);
+  }
+  return userIds;
+};
+const validate = async (context, userMangers, options) => {
+  const {field, createField} = options;
+
+  let userIds = getUserIds(userMangers);
+  if (context.method === 'find' || context.method === 'get') {
+    context.params.query[field] = {'$in': userIds};
+
+  } else if (context.method === 'remove') {
+    let uId = await context.service.get(context.id);
+    checkIncludes(uId.user_id);
+
+  } else if (context.method === 'update') {
+
+    checkIncludes(context.data[field]);
+  } else {
+    checkIncludes(context.data[createField]);
+
+  }
+  return context;
+};
 module.exports = function (options = {}) {
   options = Object.assign({
     field: 'user_id',
     createField: 'user'
   }, options);
-  const {field, createField} = options;
+  const {field} = options;
 
   return async context => {
     if (!context.params.provider) {
@@ -21,58 +83,13 @@ module.exports = function (options = {}) {
     if (!context.params.payload.userId) {
       throw new Forbidden('NOT AUTHENTICATED!');
     }
-    const sequelize = context.app.get('sequelizeClient');
-    const user_manager = sequelize.models['user_manager'];
-    let year = 1;
+    let uM = await getUMs(context, field);
 
-    if (context.params.query.year) {
-      year = context.params.query.year;
-    } else if (context.params.query.year_id) {
-      year = context.params.query.year_id;
-    } else if (context.params.user.enabledYear) {
-      year = context.params.user.enabledYear;
-    }
-    let uM = [];
-    if (!context.params.query[field] || context.params.query.includeSub === 'true') {
-      uM = await user_manager.findAll({
-        where: {manage_id: context.params.payload.userId, year_id: year}
-
-      });
-    } else {
-      uM = await user_manager.findAll({
-        where: {manage_id: context.params.payload.userId, user_id: context.params.query[field], year_id: year}
-
-      });
-    }
     delete context.params.query[field];
     delete context.params.query.includeSub;
 
     if (uM) {
-      let userIds = [];
-      for (const manageEntry of uM) {
-        userIds.push(manageEntry.user_id);
-      }
-      if (context.method === 'find' || context.method === 'get') {
-        context.params.query[field] = {'$in': userIds};
-
-      } else if (context.method === 'remove') {
-        let uId = await context.service.get(context.id);
-        if (!userIds.includes(uId.user_id)) {
-          throw new BadRequest('Invalid User ID');
-          //        console.log(context);
-        }
-      } else if (context.method === 'update') {
-
-        if (!userIds.includes(context.data[field])) {
-          throw new BadRequest('Invalid User ID');
-          //        console.log(context);
-        }
-      } else {
-        if (!userIds.includes(context.data[createField])) {
-          throw new BadRequest('Invalid User ID');
-          //        console.log(context);
-        }
-      }
+      context = await validate(context, uM, options);
 
     }
     return context;
