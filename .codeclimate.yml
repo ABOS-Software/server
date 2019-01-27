@@ -4,3 +4,6 @@ plugins:
     channel: "eslint-5"
 exclude_patterns:
   - "**/models"
+  - "*.test.js"
+similar-code:
+  enabled: false
