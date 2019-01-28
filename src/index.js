@@ -2,9 +2,8 @@
 const logger = require('./logger');
 const app = require('./app');
 const port = process.env.PORT || app.get('port');
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').load();
-}
+require('dotenv').load();
+
 if (app.get('env') !== 'test' && app.get('env') !== 'test_local') {
   const server = app.listen(port);
   server.on('listening', () => {
