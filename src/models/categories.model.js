@@ -2,27 +2,27 @@
 // for more of what you can do here.
 const Sequelize = require('sequelize');
 const DataTypes = Sequelize.DataTypes;
+const schema = {
+  id: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    primaryKey: true,
+    autoIncrement: true
+  },
 
+  category_name: {
+    type: DataTypes.STRING(255),
+    allowNull: false
+  },
+  delivery_date: {
+    type: DataTypes.DATE,
+    allowNull: false
+  },
+
+};
 module.exports = function (app) {
   const sequelizeClient = app.get('sequelizeClient');
-  const category = sequelizeClient.define('categories', {
-    id: {
-      type: DataTypes.BIGINT,
-      allowNull: false,
-      primaryKey: true,
-      autoIncrement: true
-    },
-
-    category_name: {
-      type: DataTypes.STRING(255),
-      allowNull: false
-    },
-    delivery_date: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-
-  }, {
+  const category = sequelizeClient.define('categories', schema, {
     tableName: 'categories', underscored: true,
   });
   category.associate = models => {

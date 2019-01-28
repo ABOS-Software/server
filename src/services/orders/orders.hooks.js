@@ -1,88 +1,46 @@
-const {ordersAttr, customerAttr, orderedProductsAttr, yearAttr, userAttr, productsAttr} = require('../../models/attributes');
-// const seqClient = app.get('sequelizeClient');
-// const customers = seqClient.models['customers'];
-// const products = seqClient.models['products'];
+const {orderedProductsAttr, yearAttr} = require('../../models/attributes');
+const {productsInc} = require('../../models/includes');
+
 const {authenticate} = require('@feathersjs/authentication').hooks;
 const checkPermissions = require('../../hooks/check-permissions');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
 const {disallow} = require('feathers-hooks-common');
+const {getYearWhere} = require('../utils');
 
+const sequelizeParams = () => {
+  return async context => {
+    const seqClient = context.app.get('sequelizeClient');
+    const customers = seqClient.models['customers'];
+    const orderedProducts = seqClient.models['ordered_products'];
+
+    const year = seqClient.models['year'];
+    let yrInc = getYearWhere(context);
+
+    delete context.params.query.year;
+
+    context.params.sequelize = {
+      include: [{model: customers, attributes: ['donation']}, {
+        model: orderedProducts,
+        attributes: orderedProductsAttr,
+        include: [productsInc(seqClient), {model: year, attributes: yearAttr}],
+        as: 'orderedProducts'
+      }, yrInc],
+      attributes: ['id', 'cost', 'quantity', ['amount_paid', 'amountPaid'], 'delivered', ['user_name', 'userName'], 'customer_id', 'year_id'],
+    };
+
+    return context;
+  };
+};
 
 module.exports = {
   before: {
     all: [authenticate('jwt'), checkPermissions(['ROLE_USER']), filterManagedUsers()],
-    find(context) {
-      // Get the Sequelize instance. In the generated application via:
-      const seqClient = context.app.get('sequelizeClient');
-      const categories = seqClient.models['categories'];
-      const customers = seqClient.models['customers'];
-      const orderedProducts = seqClient.models['ordered_products'];
-      const products = seqClient.models['products'];
-
-      const year = seqClient.models['year'];
-      let yrInc = {model: year, attributes: yearAttr};
-      if (context.params.query.year) {
-        yrInc.where = {id: context.params.query.year};
-
-      }
-      delete context.params.query.year;
-
-      context.params.sequelize = {
-        include: [{model: customers, attributes: ['donation']}, {
-          model: orderedProducts,
-          attributes: orderedProductsAttr,
-          include: [{
-            model: products,
-            attributes: productsAttr,
-            include: [{model: categories}, {model: year, attributes: yearAttr}],
-            as: 'products'
-          }, {model: year, attributes: yearAttr}],
-          as: 'orderedProducts'
-        }, yrInc],
-        attributes: ['id', 'cost', 'quantity', ['amount_paid', 'amountPaid'], 'delivered', ['user_name', 'userName'], 'customer_id', 'year_id'],
-      };
-
-      return context;
-    },
-    get(context) {
-      const seqClient = context.app.get('sequelizeClient');
-      const categories = seqClient.models['categories'];
-      const customers = seqClient.models['customers'];
-      const orderedProducts = seqClient.models['ordered_products'];
-      const products = seqClient.models['products'];
-
-      const year = seqClient.models['year'];
-      // Get the Sequelize instance. In the generated application via:
-      //  const sequelize = context.app.get('sequelizeClient');
-      let yrInc = {model: year, attributes: yearAttr};
-      if (context.params.query.year) {
-        yrInc.where = {id: context.params.query.year};
-        delete context.params.query.year;
-
-      }
-      delete context.params.query.year;
-
-      context.params.sequelize = {
-        include: [{model: customers, attributes: ['donation']}, {
-          model: orderedProducts,
-          attributes: orderedProductsAttr,
-          include: [{
-            model: products,
-            attributes: productsAttr,
-            include: [{model: categories}, {model: year, attributes: yearAttr}],
-            as: 'products'
-          }, {model: year, attributes: yearAttr}],
-          as: 'orderedProducts'
-        }, yrInc],
-        attributes: ['id', 'cost', 'quantity', ['amount_paid', 'amountPaid'], 'delivered', ['user_name', 'userName'], 'customer_id', 'year_id'],
-      };
-
-      return context;
-    },
-    create: [disallow()],
-    update: [disallow()],
-    patch: [disallow()],
-    remove: [disallow()]
+    find: [sequelizeParams()],
+    get: [sequelizeParams()],
+    create: [disallow('external')],
+    update: [disallow('external')],
+    patch: [disallow('external')],
+    remove: [disallow('external')]
   },
 
   after: {

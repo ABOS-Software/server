@@ -4,7 +4,19 @@ const filterManagedUsers = require('../../hooks/filter-managed-users');
 const {
   hashPassword, protect
 } = require('@feathersjs/authentication-local').hooks;
+const sequelizeParams = () => {
+  return async context => {
+    // Get the Sequelize instance. In the generated application via:
+    //  const sequelize = context.app.get('sequelizeClient');
 
+
+    context.params.sequelize = {
+      attributes: [['full_name', 'fullName'], 'username', 'id', 'password']
+    };
+
+    return context;
+  };
+};
 module.exports = {
   before: {
     all: [authenticate('jwt')],
@@ -13,28 +25,8 @@ module.exports = {
     update: [hashPassword(), checkPermissions(['ROLE_ADMIN'])],
     patch: [hashPassword(), checkPermissions(['ROLE_ADMIN'])],
     remove: [checkPermissions(['ROLE_ADMIN'])],
-    find: [function (context) {
-      // Get the Sequelize instance. In the generated application via:
-      //  const sequelize = context.app.get('sequelizeClient');
-
-
-      context.params.sequelize = {
-        attributes: [['full_name', 'fullName'], 'username', 'id', 'password']
-      };
-
-      return context;
-    }, authenticate('jwt'), filterManagedUsers({field: 'id'})],
-    get: [function (context) {
-      // Get the Sequelize instance. In the generated application via:
-      //  const sequelize = context.app.get('sequelizeClient');
-
-
-      context.params.sequelize = {
-        attributes: [['full_name', 'fullName'], 'username', 'id']
-      };
-
-      return context;
-    }, filterManagedUsers({field: 'id'})],
+    find: [sequelizeParams(), authenticate('jwt'), filterManagedUsers({field: 'id'})],
+    get: [sequelizeParams(), filterManagedUsers({field: 'id'})],
 
   },
 

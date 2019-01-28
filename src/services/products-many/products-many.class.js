@@ -8,6 +8,34 @@ class Service {
   async get(id, params) {
   }
 
+  async createProduct(product, year) {
+    const seqClient = this.app.get('sequelizeClient');
+
+    const products = seqClient.models['products'];
+    await products.create({
+      human_product_id: product.humanProductId,
+      product_name: product.productName,
+      unit_size: product.unitSize,
+      unit_cost: product.unitCost,
+      category_id: product.category,
+      year_id: year
+    });
+  }
+
+  async updateProducts(product) {
+    const seqClient = this.app.get('sequelizeClient');
+
+    const products = seqClient.models['products'];
+    let prod = await products.findByPk(product.id);
+
+    prod.human_product_id = product.humanProductId;
+    prod.product_name = product.productName;
+    prod.unit_size = product.unitSize;
+    prod.unit_cost = product.unitCost;
+    prod.category_id = product.category;
+    await prod.save();
+  }
+
   async create(data, params) {
     const seqClient = this.app.get('sequelizeClient');
 
@@ -19,25 +47,11 @@ class Service {
     for (const product of newProducts) {
 
       if (product.status !== 'DELETE') {
-        await products.create({
-          human_product_id: product.humanProductId,
-          product_name: product.productName,
-          unit_size: product.unitSize,
-          unit_cost: product.unitCost,
-          category_id: product.category,
-          year_id: data.year
-        });
+        await this.createProduct(product, data.year);
       }
     }
     for (const product of updatedProducts) {
-      let prod = await products.findByPk(product.id);
-
-      prod.human_product_id = product.humanProductId;
-      prod.product_name = product.productName;
-      prod.unit_size = product.unitSize;
-      prod.unit_cost = product.unitCost;
-      prod.category_id = product.category;
-      await prod.save();
+      await this.updateProducts(product);
 
     }
     for (const product of deletedProducts) {
