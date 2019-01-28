@@ -208,7 +208,10 @@ class Service {
       let usr = usersM.get(uK);
       u.status = await this.userStatus(u.enabledYear, u.status, yr, usr.id);
 
-      retEnabledYear = await this.updateUserYear(usr, yr, u, params);
+      let retYear = await this.updateUserYear(usr, yr, u, params);
+      if (retYear > -1) {
+        retEnabledYear = retYear;
+      }
       //let subUsers = [:]
       await this.setSubUsers(u, yr, usr, usersM);
 
