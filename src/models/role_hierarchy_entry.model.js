@@ -2,23 +2,23 @@
 // for more of what you can do here.
 const Sequelize = require('sequelize');
 const DataTypes = Sequelize.DataTypes;
+const defintion = {
+  id: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    primaryKey: true,
+    autoIncrement: true
+  },
 
+  entry: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    unique: true
+  }
+};
 module.exports = function (app) {
   const sequelizeClient = app.get('sequelizeClient');
-  const roleHierarchyEntry = sequelizeClient.define('role_hierarchy_entry', {
-    id: {
-      type: DataTypes.BIGINT,
-      allowNull: false,
-      primaryKey: true,
-      autoIncrement: true
-    },
-
-    entry: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-      unique: true
-    }
-  }, {
+  const roleHierarchyEntry = sequelizeClient.define('role_hierarchy_entry', defintion, {
     tableName: 'role_hierarchy_entry', underscored: true,
   });
 

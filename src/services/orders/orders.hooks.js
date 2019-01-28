@@ -1,26 +1,21 @@
-const {ordersAttr, customerAttr, orderedProductsAttr, yearAttr, userAttr, productsAttr} = require('../../models/attributes');
+const {orderedProductsAttr, yearAttr} = require('../../models/attributes');
 const {productsInc} = require('../../models/includes');
-// const seqClient = app.get('sequelizeClient');
-// const customers = seqClient.models['customers'];
-// const products = seqClient.models['products'];
+
 const {authenticate} = require('@feathersjs/authentication').hooks;
 const checkPermissions = require('../../hooks/check-permissions');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
 const {disallow} = require('feathers-hooks-common');
+const {getYearWhere} = require('../utils');
+
 const sequelizeParams = () => {
   return async context => {
     const seqClient = context.app.get('sequelizeClient');
-    const categories = seqClient.models['categories'];
     const customers = seqClient.models['customers'];
     const orderedProducts = seqClient.models['ordered_products'];
-    const products = seqClient.models['products'];
 
     const year = seqClient.models['year'];
-    let yrInc = {model: year, attributes: yearAttr};
-    if (context.params.query.year) {
-      yrInc.where = {id: context.params.query.year};
+    let yrInc = getYearWhere(context);
 
-    }
     delete context.params.query.year;
 
     context.params.sequelize = {

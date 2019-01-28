@@ -2,23 +2,23 @@
 // for more of what you can do here.
 const Sequelize = require('sequelize');
 const DataTypes = Sequelize.DataTypes;
+const definition = {
+  id: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    primaryKey: true,
+    autoIncrement: true
+  },
 
+  year: {
+    type: DataTypes.STRING(4),
+    allowNull: false,
+    unique: true
+  }
+};
 module.exports = function (app) {
   const sequelizeClient = app.get('sequelizeClient');
-  const year = sequelizeClient.define('year', {
-    id: {
-      type: DataTypes.BIGINT,
-      allowNull: false,
-      primaryKey: true,
-      autoIncrement: true
-    },
-
-    year: {
-      type: DataTypes.STRING(4),
-      allowNull: false,
-      unique: true
-    }
-  }, {
+  const year = sequelizeClient.define('year', definition, {
     tableName: 'year', underscored: true,
   });
 

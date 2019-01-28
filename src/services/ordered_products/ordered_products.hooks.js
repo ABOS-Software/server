@@ -1,8 +1,9 @@
-const {ordersAttr, customerAttr, orderedProductsAttr, yearAttr, userAttr, productsAttr} = require('../../models/attributes');
+const {yearAttr, productsAttr} = require('../../models/attributes');
 const {authenticate} = require('@feathersjs/authentication').hooks;
 const checkPermissions = require('../../hooks/check-permissions');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
 const {disallow} = require('feathers-hooks-common');
+const {getYearWhere} = require('../utils');
 const sequelizeParams = () => {
   return async context => {
     // Get the Sequelize instance. In the generated application via:
@@ -10,14 +11,15 @@ const sequelizeParams = () => {
     const categories = sequelize.models['categories'];
 
     const products = sequelize.models['products'];
-
-
     const year = sequelize.models['year'];
-    let yrInc = {model: year, attributes: yearAttr};
-    if (context.params.query.year) {
-      yrInc.where = {id: context.params.query.year};
 
-    }
+    let yrInc = getYearWhere(context);
+    // const year = sequelize.models['year'];
+    // let yrInc = {model: year, attributes: yearAttr};
+    // if (context.params.query.year) {
+    //   yrInc.where = {id: context.params.query.year};
+    //
+    // }
     delete context.params.query.year;
 
     context.params.sequelize = {

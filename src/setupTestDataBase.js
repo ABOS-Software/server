@@ -5,7 +5,8 @@ const config = require('config');
 async function setup() {
   var connection;
   var database;
-  if (process.env.NODE_ENV === 'test') {
+  let dbURL = process.env.DATABASE_URL;
+  if (dbURL) {
     let connectionString = process.env.DATABASE_URL;
     database = process.env.MYSQL_DATABASE;
     connection = await mysql.createConnection(connectionString);
