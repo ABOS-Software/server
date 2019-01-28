@@ -66,6 +66,11 @@ const definintion = {
     type: DataTypes.STRING(255),
     allowNull: true
   },
+  use_coords: {
+    type: DataTypes.BOOLEAN(),
+    allowNull: true,
+    defaultValue: true
+  }
 
 };
 module.exports = function (app) {

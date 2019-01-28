@@ -3,6 +3,7 @@ const {ordersInc, yearInc} = require('../../models/includes');
 
 const {customerAttr, userAttr} = require('../../models/attributes');
 const {authenticate} = require('@feathersjs/authentication').hooks;
+const opencage = require('opencage-api-client');
 const checkPermissions = require('../../hooks/check-permissions');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
 const makeOptions = (sequelize, yearVal) => {
@@ -116,6 +117,7 @@ const saveOrder = () => {
     return await generateResult(ord, customer, seqClient, context);
   };
 };
+
 const updateCustomerOrderedProducts = (customer, usr, update) => {
   let ops = [];
   customer.order.orderedProducts.forEach(op => {
@@ -136,12 +138,29 @@ const updateCustomerOrderedProducts = (customer, usr, update) => {
   customer.order.orderedProducts = ops;
   return customer;
 };
-const updateCustomer = (customer, usr, update) => {
+const getCoords = async (address) => {
+  let geocode = await opencage
+    .geocode({q: address, countrycode: 'us', min_confidence: 6, no_annotations: 1, limit: 1});
+  if (geocode && geocode.results.length > 0) {
+    return geocode.results[0].geometry;
+  }
+  return false;
+
+};
+const updateCustomer = async (customer, usr, update) => {
   customer.user_name = usr.username;
   customer.customer_name = customer.customerName;
   customer.street_address = customer.streetAddress;
-  customer.latitude = 0;
-  customer.longitude = 0;
+  customer.zip_code = customer.zipCode;
+  let coords = await getCoords(customer.street_address + ' ' + customer.city + ', ' + customer.state + ' ' + customer.zipCode);
+  if (coords) {
+    customer.latitude = coords.lat;
+    customer.longitude = coords.lng;
+  } else {
+    customer.latitude = 0;
+    customer.longitude = 0;
+    customer.use_coords = false;
+  }
 
   customer = updateCustomerOrderedProducts(customer, usr, update);
 
@@ -187,7 +206,7 @@ const prepOrder = () => {
       customer.user_id = customer.user;
       customer.year_id = customer.year;
     }
-    context.data = updateCustomer(customer, usr, update);
+    context.data = await updateCustomer(customer, usr, update);
     context.params.sequelize = orderSequelizeOptions(sequelize);
     return context;
   };

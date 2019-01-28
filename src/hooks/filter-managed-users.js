@@ -55,13 +55,13 @@ const validate = async (context, userMangers, options) => {
 
   } else if (context.method === 'remove') {
     let uId = await context.service.get(context.id);
-    checkIncludes(uId.user_id);
+    checkIncludes(uId.user_id, userIds);
 
   } else if (context.method === 'update') {
 
-    checkIncludes(context.data[field]);
+    checkIncludes(context.data[field], userIds);
   } else {
-    checkIncludes(context.data[createField]);
+    checkIncludes(context.data[createField], userIds);
 
   }
   return context;
