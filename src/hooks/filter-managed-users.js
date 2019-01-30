@@ -47,24 +47,28 @@ const getUserIds = (userManagers) => {
   return userIds;
 };
 const validate = async (context, userMangers, options) => {
-  const {field, createField} = options;
+  try {
+    const {field, createField} = options;
 
-  let userIds = getUserIds(userMangers);
-  if (context.method === 'find' || context.method === 'get') {
-    context.params.query[field] = {'$in': userIds};
+    let userIds = getUserIds(userMangers);
+    if (context.method === 'find' || context.method === 'get') {
+      context.params.query[field] = {'$in': userIds};
 
-  } else if (context.method === 'remove') {
-    let uId = await context.service.get(context.id);
-    checkIncludes(uId.user_id, userIds);
+    } else if (context.method === 'remove') {
+      let uId = await context.service.get(context.id);
+      checkIncludes(uId.user_id, userIds);
 
-  } else if (context.method === 'update') {
+    } else if (context.method === 'update') {
 
-    checkIncludes(context.data[field], userIds);
-  } else {
-    checkIncludes(context.data[createField], userIds);
+      checkIncludes(context.data[field], userIds);
+    } else {
+      checkIncludes(context.data[createField], userIds);
 
+    }
+    return context;
+  } catch (e) {
+    throw e;
   }
-  return context;
 };
 module.exports = function (options = {}) {
   options = Object.assign({
@@ -89,7 +93,11 @@ module.exports = function (options = {}) {
     delete context.params.query.includeSub;
 
     if (uM) {
-      context = await validate(context, uM, options);
+      try {
+        context = await validate(context, uM, options);
+      } catch (e) {
+        throw e;
+      }
 
     }
     return context;
