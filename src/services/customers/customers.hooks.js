@@ -257,6 +257,7 @@ const deArrayContext = (customers, context) => {
 };
 const calcProductCostsHook = () => {
   return async context => {
+    throw Error('test');
     let customersD = arrayContext(context);
     let customers = calcProductCostsMultiple(customersD);
     return deArrayContext(customers, context);

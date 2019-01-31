@@ -5,8 +5,8 @@ module.exports = '<html>\n' +
   '  </title>\n' +
   '  <style type="text/css">\n' +
   '    * {\n' +
-  '      margin-top: 0px;\n' +
-  '      margin-bottom: 0px;\n' +
+  '      margin-top: 0;\n' +
+  '      margin-bottom: 0;\n' +
   '      font-family: \'Helvetica Neue\', \'Helvetica\', Helvetica, Arial, sans-serif;\n' +
   '    }\n' +
   '\n' +
@@ -21,7 +21,7 @@ module.exports = '<html>\n' +
   '    }\n' +
   '\n' +
   '    .UBordered {\n' +
-  '      border: 0px solid black;\n' +
+  '      border: 0 solid black;\n' +
   '      border-collapse: collapse;\n' +
   '    }\n' +
   '\n' +
@@ -36,11 +36,11 @@ module.exports = '<html>\n' +
   '\n' +
   '    table {\n' +
   '      width: 100%;\n' +
-  '      margin-bottom: 0.4pt;\n' +
-  '      margin-top: 0;\n' +
-  '      margin-left: 0;\n' +
-  '      margin-right: 0;\n' +
-  '      text-indent: 0;\n' +
+  '' +
+  '' +
+  '' +
+  '' +
+  '      margin: 0 0 0.4pt;text-indent: 0;\n' +
   '    }\n' +
   '\n' +
   '    tr {\n' +
@@ -231,7 +231,7 @@ module.exports = '<html>\n' +
   '  TOTALS\n' +
   '</h2>\n' +
   '<div style="position:relative;">\n' +
-  '  <table class="Bordered" border="0" style="position:absolute; top:0px; right:0px;">\n' +
+  '  <table class="Bordered" border="0" style="position:absolute; top:0; right:0;">\n' +
   '\n' +
   '\n' +
   '    <tr class="Bordered">\n' +

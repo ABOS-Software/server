@@ -1,3 +1,5 @@
+import {describe} from 'nyc/lib/commands/check-coverage';
+
 const assert = require('assert');
 const feathers = require('@feathersjs/feathers');
 const checkPermissions = require('../../src/hooks/check-permissions');

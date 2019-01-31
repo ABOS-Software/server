@@ -1,7 +1,9 @@
 /* eslint-disable no-console */
 
+import {describe} from 'nyc/lib/commands/check-coverage';
+
 const assert = require('assert');
-var should = require('should');
+const should = require('should');
 
 const rp = require('request-promise');
 const url = require('url');
