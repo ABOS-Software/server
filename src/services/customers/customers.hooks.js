@@ -22,6 +22,7 @@ const makeOptions = (sequelize, yearVal) => {
 };
 const sequelizeParams = () => {
   return async context => {
+
     const sequelize = context.app.get('sequelizeClient');
 
     let yearVal = null;
@@ -257,7 +258,6 @@ const deArrayContext = (customers, context) => {
 };
 const calcProductCostsHook = () => {
   return async context => {
-    throw Error('test');
     let customersD = arrayContext(context);
     let customers = calcProductCostsMultiple(customersD);
     return deArrayContext(customers, context);
