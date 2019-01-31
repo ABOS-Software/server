@@ -1,4 +1,3 @@
-import {describe} from 'nyc/lib/commands/check-coverage';
 
 const assert = require('assert');
 const request = require('supertest');

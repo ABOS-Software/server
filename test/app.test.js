@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 
-import {describe} from 'nyc/lib/commands/check-coverage';
 
 const assert = require('assert');
 const should = require('should');
