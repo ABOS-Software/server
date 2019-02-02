@@ -64,7 +64,7 @@ module.exports = class reportsService {
     let tCostT = 0.0;
     let quantityT = 0;
     for (const cust of customers) {
-      let custYr = await this.generateCustomerPage(cust, inputs);
+      let custYr = await this.generateCustomerPage(cust.dataValues, inputs);
       tCostT += custYr.tCost;
       quantityT += custYr.tQuant;
       customerYrs.push(custYr.data);
@@ -230,6 +230,13 @@ module.exports = class reportsService {
   }
 
   doesCustomerHaveProducts(cust) {
+    if (!cust.order) {
+      return false;
+    }
+    if (!cust.order.orderedProducts) {
+      return false;
+    }
+
     let orderArray = cust.order.orderedProducts;
     const totalQuantity = orderArray.reduce((a, b) => {
       return a + b.quantity;
