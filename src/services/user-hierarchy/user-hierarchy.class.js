@@ -154,20 +154,21 @@ class Service {
 
   async setSubUsers(userObj, year, user, usersM) {
 
+    let managed = await this.getManagedList(user, year);
 
     for (const suK of Object.keys(userObj.subUsers)) {
       const su = userObj.subUsers[suK];
       let subUser = usersM.get(suK);
-      await this.setSubUser(user, su, year, subUser);
+      await this.setSubUser(user, su, year, subUser, managed);
 
 
     }
   }
 
-  async setSubUser(user, su, year, subUser) {
+  async setSubUser(user, su, year, subUser, managed) {
     const seqClient = this.app.get('sequelizeClient');
     const userManager = seqClient.models['user_manager'];
-    let managed = await this.getManagedList(user, year);
+    //let managed = await this.getManagedList(user, year);
     if (su.checked) {
       await userManager.findOrCreate({where: {manage_id: user.id, user_id: subUser.id, year_id: year.id}});
 
