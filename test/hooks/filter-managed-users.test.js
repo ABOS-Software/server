@@ -1,3 +1,4 @@
+
 const assert = require('assert');
 const feathers = require('@feathersjs/feathers');
 const filterManagedUsers = require('../../src/hooks/filter-managed-users');

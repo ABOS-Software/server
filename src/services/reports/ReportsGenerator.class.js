@@ -142,14 +142,14 @@ class ReportsGenerator {
     let customers = this.getCustomersArray(jsonParams);
     let user = jsonParams.User;
     let {Splitting, fileName, Category, includeHeader} = await this.getTemplateMetaData(jsonParams);
-    let formattedAddress = jsonParams.Scout_Town + ', ' + jsonParams.Scout_State + ' ' + jsonParams.Scout_Zip;
+    let formattedAddress = jsonParams.city + ', ' + jsonParams.state + ' ' + jsonParams.zipCode;
 
     jsonParams = this.setLogoLocation(jsonParams);
     let options = {
       reportType: jsonParams.template,
       selectedYear: jsonParams.Year,
       scoutName: jsonParams.Scout_name,
-      scoutStAddr: jsonParams.Scout_address,
+      scoutStAddr: jsonParams.streetAddress,
       scoutCityLine: formattedAddress,
       scoutRank: jsonParams.Scout_Rank,
       scoutPhone: jsonParams.Scout_Phone,

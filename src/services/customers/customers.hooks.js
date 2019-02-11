@@ -22,6 +22,7 @@ const makeOptions = (sequelize, yearVal) => {
 };
 const sequelizeParams = () => {
   return async context => {
+
     const sequelize = context.app.get('sequelizeClient');
 
     let yearVal = null;
@@ -120,6 +121,11 @@ const saveOrder = () => {
 
 const updateCustomerOrderedProducts = (customer, usr, update) => {
   let ops = [];
+  if (!customer.order.orderedProducts) {
+    customer.order.orderedProducts = [];
+    customer.order.quantity = 0;
+    customer.order.cost = 0;
+  }
   customer.order.orderedProducts.forEach(op => {
     op.extended_cost = op.extendedCost;
     op.user_name = usr.username;

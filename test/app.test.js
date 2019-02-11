@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
 
+
 const assert = require('assert');
-var should = require('should');
+const should = require('should');
 
 const rp = require('request-promise');
 const url = require('url');

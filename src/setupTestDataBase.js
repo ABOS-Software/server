@@ -3,8 +3,8 @@ const mysql = require('mysql2/promise');
 const config = require('config');
 //...
 async function setup() {
-  var connection;
-  var database;
+  let connection;
+  let database;
   let dbURL = process.env.DATABASE_URL;
   if (dbURL) {
     let connectionString = process.env.DATABASE_URL;
