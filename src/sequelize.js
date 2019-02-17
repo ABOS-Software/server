@@ -73,6 +73,7 @@ const getLogger = (connectionDetails) => {
 };
 const getSequelizeInstance = (app) => {
   const connectionDetails = app.get('mysql');
+  logger.debug(JSON.stringify(connectionDetails));
   let dbURL = process.env.DATABASE_URL || connectionDetails.URL;
   let sequelize;
 
