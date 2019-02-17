@@ -73,6 +73,7 @@ const getLogger = (connectionDetails) => {
 };
 const getSequelizeInstance = (app) => {
   const connectionDetails = app.get('mysql');
+  logger.debug(JSON.stringify(connectionDetails));
   let dbURL = process.env.DATABASE_URL || connectionDetails.URL;
   let sequelize;
 
@@ -87,6 +88,9 @@ const getSequelizeInstance = (app) => {
   } catch (e) {
     logger.error('problems connecting to database', e);
     throw e;
+  }
+  if (!sequelize) {
+    throw new Error('Error connecting to database');
   }
   return sequelize;
 };

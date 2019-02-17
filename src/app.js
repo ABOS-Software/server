@@ -23,15 +23,19 @@ const sequelize = require('./sequelize');
 const jsreport = require('./jsreport');
 
 const authentication = require('./authentication');
-Sentry.init({ dsn: 'https://46b1c3524371490ba2b98752ccc1dc5f@sentry.io/1365360' });
-Sentry.configureScope(scope => {
-  scope.addEventProcessor((event, hint) => {
+const validErrors = require('./Errors');
+Sentry.init({ dsn: 'https://46b1c3524371490ba2b98752ccc1dc5f@sentry.io/1365360',
+  beforeSend(event, hints) {
+
+    if (hints.originalException.code && !validErrors.includes(hints.originalException.code)) {
+      event = null;
+    }
     if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'staging') {
       event = null;
     }
     return event;
-  });
-});
+  }});
+
 const app = express(feathers());
 app.use(Sentry.Handlers.requestHandler());
 
