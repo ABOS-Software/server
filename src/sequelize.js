@@ -89,6 +89,9 @@ const getSequelizeInstance = (app) => {
     logger.error('problems connecting to database', e);
     throw e;
   }
+  if (!sequelize) {
+    throw new Error('Error connecting to database');
+  }
   return sequelize;
 };
 module.exports = function (app) {
