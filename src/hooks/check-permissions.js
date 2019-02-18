@@ -51,6 +51,7 @@ const checkDeep = async (roleName, roleRequired, sequelize) => {
       return true;
     }
   }
+  return false;
 };
 const resolveContext = context => {
   return Promise.resolve(context);
@@ -67,7 +68,7 @@ const checkHook = async (context, roleParam) => {
   if (roleName === roleRequired) {
     return resolveContext(context);
   }
-  if (checkDeep(roleName, roleRequired, sequelize)) {
+  if (await checkDeep(roleName, roleRequired, sequelize)) {
     return resolveContext(context);
   }
   throw new Forbidden('You do not have the correct permissions.');
