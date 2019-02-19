@@ -651,7 +651,7 @@ production:
   function create_config() {
     echo "Create Config..."
     echo $APPLICATION_CONFIG > config/production.json
-    echo "OCD_API_KEY="$OCD_API_KEY
+    echo "OCD_API_KEY="$OCD_API_KEY > .env
 
   }
 
