@@ -67,6 +67,8 @@ const updateOrderedProducts = async (order, customer, custData, sequelize) => {
   let user = await customer.getUser();
   let year = await customer.getYear();
   let ops = [];
+  let extendedCost = 0.0;
+  let quantity = 0;
   order.user_name = custData.user_name;
 
   for (const op of custData.order.orderedProducts) {
@@ -74,7 +76,8 @@ const updateOrderedProducts = async (order, customer, custData, sequelize) => {
     let opM = await getOrderedProduct(op, sequelize);
     let product = await products.findByPk(op.products_id);
     opM.user_name = custData.user_name;
-
+    extendedCost += opM.extended_cost;
+    quantity += opM.quantity;
     opM.setUser(user, {save: false});
     opM.setYear(year, {save: false});
     opM.setCustomer(customer, {save: false});
@@ -83,7 +86,7 @@ const updateOrderedProducts = async (order, customer, custData, sequelize) => {
     let response5 = await opM.save();
     ops.push(response5);
   }
-  return ops;
+  return {ops: ops, extendedCost: extendedCost, quantity: quantity};
 };
 const generateResult = async (ord, customer, seqClient, context) => {
   const customers = seqClient.models['customers'];
@@ -111,8 +114,10 @@ const saveOrder = () => {
 
     let order = await getOrder(custData, seqClient);
     let customer = await customers.findByPk(custData.id);
-    let ops = await updateOrderedProducts(order, customer, custData, seqClient);
+    let {ops, extendedCost, quantity} = await updateOrderedProducts(order, customer, custData, seqClient);
     await order.setOrderedProducts(ops, {save: false});
+    order.quantity = quantity;
+    order.cost = extendedCost;
     //
     let ord = await order.save();
     return await generateResult(ord, customer, seqClient, context);
@@ -126,6 +131,10 @@ const updateCustomerOrderedProducts = (customer, usr, update) => {
     customer.order.quantity = 0;
     customer.order.cost = 0;
   }
+  customer.order.quantity = customer.order.quantity || 0;
+  customer.order.cost = customer.order.cost || 0;
+
+
   customer.order.orderedProducts.forEach(op => {
     op.extended_cost = op.extendedCost;
     op.user_name = usr.username;
