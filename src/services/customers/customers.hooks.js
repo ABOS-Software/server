@@ -38,6 +38,25 @@ const sequelizeParams = () => {
     return context;
   };
 };
+const fuzzySearch = () => {
+  return async context => {
+
+    const sequelize = context.app.get('sequelizeClient');
+
+    if (context.params.query && context.params.query.customer_name) {
+      let where = context.params.sequelize.where || {};
+      where.customer_name = {
+        [sequelize.Op.like]: '%' + context.params.query.customer_name + '%'
+      };
+      context.params.sequelize.where = where;
+      delete context.params.query.customer_name;
+
+    }
+
+
+    return context;
+  };
+};
 const getOrder = async (custData, sequelize) => {
   const orders = sequelize.models['orders'];
 
@@ -280,7 +299,7 @@ const calcProductCostsHook = () => {
 module.exports = {
   before: {
     all: [authenticate('jwt'), checkPermissions(['ROLE_USER']), filterManagedUsers()],
-    find: [sequelizeParams()],
+    find: [sequelizeParams(), fuzzySearch()],
     get: [sequelizeParams()],
     create: [prepOrder()],
     update: [prepOrder()],
