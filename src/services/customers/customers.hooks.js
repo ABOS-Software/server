@@ -118,6 +118,44 @@ const generateResult = async (ord, customer, seqClient, context) => {
     }
   }
 };
+const checkError = async (customer, model, context) => {
+  if (Array.isArray(model)) {
+    let ret = [];
+    for (const mod of model) {
+      ret.push(await checkError(customer, mod));
+    }
+  }
+  if (typeof model === ValidationError) {
+    await safeDeleteCustomer(customer, context);
+    throw model;
+  }
+  return model;
+};
+const safeDeleteCustomerContext = () => {
+  return async context => {
+    if (context.method === 'create') {
+      let custData;
+      if (context.method === 'update') {
+        custData = context.data;
+      } else {
+        custData = context.result;
+      }
+
+      const seqClient = context.app.get('sequelizeClient');
+      const customers = seqClient.models['customers'];
+      if (custData && custData.id) {
+        let customer = await customers.findByPk(custData.id);
+        await safeDeleteCustomer(customer, context);
+      }
+    }
+    return context;
+  };
+};
+const safeDeleteCustomer = async (customer, context) => {
+  if (context.method === 'create' && customer) {
+    await customer.destroy();
+  }
+};
 const saveOrder = () => {
   return async context => {
     let custData;
@@ -127,19 +165,28 @@ const saveOrder = () => {
       custData = context.result;
     }
 
-
     const seqClient = context.app.get('sequelizeClient');
     const customers = seqClient.models['customers'];
 
-    let order = await getOrder(custData, seqClient);
     let customer = await customers.findByPk(custData.id);
-    let {ops, extendedCost, quantity} = await updateOrderedProducts(order, customer, custData, seqClient);
-    await order.setOrderedProducts(ops, {save: false});
-    order.quantity = quantity;
-    order.cost = extendedCost;
-    //
-    let ord = await order.save();
-    return await generateResult(ord, customer, seqClient, context);
+    try {
+      let order = await getOrder(custData, seqClient);
+
+      let {ops, extendedCost, quantity} = await updateOrderedProducts(order, customer, custData, seqClient);
+      await checkError(customer, ops, context);
+      await order.setOrderedProducts(ops, {save: false});
+      order.quantity = quantity;
+      order.cost = extendedCost;
+      //
+      let ord = await order.save();
+      await checkError(customer, ord, context);
+
+      return await generateResult(ord, customer, seqClient, context);
+    }
+    catch (e) {
+      await safeDeleteCustomer(customer, context);
+      return context;
+    }
   };
 };
 
@@ -321,7 +368,7 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [],
+    create: [safeDeleteCustomerContext()],
     update: [],
     patch: [],
     remove: []
