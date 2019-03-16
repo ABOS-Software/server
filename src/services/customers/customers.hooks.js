@@ -232,6 +232,7 @@ const updateCustomer = async (customer, usr, update) => {
   customer.user_name = usr.username;
   customer.customer_name = customer.customerName;
   customer.street_address = customer.streetAddress;
+  customer.cust_email = customer.custEmail;
   customer.zip_code = customer.zipCode;
   let coords = await getCoords(customer.street_address + ' ' + customer.city + ', ' + customer.state + ' ' + customer.zipCode);
   if (coords) {
