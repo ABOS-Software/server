@@ -65,9 +65,11 @@ module.exports = class reportsService {
     let quantityT = 0;
     for (const cust of customers) {
       let custYr = await this.generateCustomerPage(cust.dataValues, inputs);
-      tCostT += custYr.tCost;
-      quantityT += custYr.tQuant;
-      customerYrs.push(custYr.data);
+      if (custYr.tQuant > 0) {
+        tCostT += custYr.tCost;
+        quantityT += custYr.tQuant;
+        customerYrs.push(custYr.data);
+      }
     }
     return {totalCost: tCostT, quantityT: quantityT, customerYears: customerYrs};
   }
