@@ -14,6 +14,10 @@ const year = require('./year/year.service.js');
 const userHierarchy = require('./user-hierarchy/user-hierarchy.service.js');
 const productsMany = require('./products-many/products-many.service.js');
 const reports = require('./reports/reports.service.js');
+const payments = require('./payments/payments.service.js');
+const paymentMethods = require('./payment_methods/payment_methods.service.js');
+const notes = require('./notes/notes.service.js');
+const noteCodes = require('./note_codes/note_codes.service.js');
 // eslint-disable-next-line no-unused-vars
 module.exports = function (app) {
   app.configure(categories);
@@ -32,4 +36,8 @@ module.exports = function (app) {
   app.configure(userHierarchy);
   app.configure(productsMany);
   app.configure(reports);
+  app.configure(payments);
+  app.configure(paymentMethods);
+  app.configure(notes);
+  app.configure(noteCodes);
 };
