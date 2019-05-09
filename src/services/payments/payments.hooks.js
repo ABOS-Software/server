@@ -24,6 +24,16 @@ const sequelizeParams = () => {
 
     return context;
   };
+
+
+};
+const update = () => {
+  return async context => {
+    context.data.payment_method_id = context.data.payment_method.id;
+    return context;
+  };
+
+
 };
 module.exports = {
   before: {
@@ -31,7 +41,7 @@ module.exports = {
     find: [sequelizeParams()] ,
     get: [sequelizeParams()],
     create: [],
-    update: [],
+    update: [update()],
     patch: [],
     remove: []
   },
