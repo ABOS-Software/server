@@ -13,20 +13,31 @@ const sequelizeParams = () => {
 
     }
     context.params.sequelize = {
-      attributes: ['id', 'note', 'created_at'],
+      attributes: ['id', 'note', 'updated_at', 'user_id', 'user_name', 'customer_id', 'year_id'],
       include: [{model: year, attributes: ['id', 'year']}, {model: note_codes, attributes: ['id', 'name']}]
     };
 
     return context;
   };
 };
+
+const update = () => {
+  return async context => {
+    context.data.note_code_id = context.data.note_code.id;
+    return context;
+  };
+
+
+};
+
+
 module.exports = {
   before: {
-    all: [ authenticate('jwt'), checkPermissions(['ROLE_USER']), filterManagedUsers() ],
+    all: [ authenticate('jwt'), checkPermissions(['ROLE_USER']), filterManagedUsers({createField: 'user_id'}) ],
     find: [sequelizeParams()] ,
     get: [sequelizeParams()],
     create: [],
-    update: [],
+    update: [update()],
     patch: [],
     remove: []
   },
