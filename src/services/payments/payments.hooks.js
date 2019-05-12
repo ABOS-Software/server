@@ -35,6 +35,21 @@ const update = () => {
 
 
 };
+
+const updateAmountPaid = () => {
+  return async context => {
+    const seqClient = context.app.get('sequelizeClient');
+
+    const orders = seqClient.models['orders'];
+    const paymentsM = seqClient.models['payments'];
+    let order = await orders.findOne({where: {customer_id: context.result.customer_id}});
+    let totalPaid = await paymentsM.sum('amount', {where: {customer_id: context.result.customer_id}});
+
+    order.amount_paid = totalPaid;
+    await order.save();
+    return context;
+  };
+};
 module.exports = {
   before: {
     all: [ authenticate('jwt'), checkPermissions(['ROLE_USER']), filterManagedUsers({createField: 'user_id'}) ],
@@ -50,10 +65,10 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [],
-    update: [],
-    patch: [],
-    remove: []
+    create: [updateAmountPaid()],
+    update: [updateAmountPaid()],
+    patch: [updateAmountPaid()],
+    remove: [updateAmountPaid()]
   },
 
   error: {
