@@ -74,11 +74,11 @@ develop:
     - gcloud --quiet --project $PROJECT_ID app deploy app.develop-fast.yaml
     - persist_environment_url
   environment:
-    name: develop
+    name: develop-fast
     url: https://develop-fast.$AUTO_DEVOPS_DOMAIN
   only:
     refs:
-      - develop
+      - develop-fast
 
 
 
