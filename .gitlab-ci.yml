@@ -57,14 +57,6 @@ variables:
 
 stages:
 
-  - test
-
-  - review
-  - dast
-
-  - production
-
-  - performance
   - deploy
 
   - cleanup
@@ -246,11 +238,11 @@ develop:
   script:
     - create_config
     - create_secret
-    - gcloud --quiet --project $PROJECT_ID app deploy app.develop.yaml
+    - gcloud --quiet --project $PROJECT_ID app deploy app.develop-fast.yaml
     - persist_environment_url
   environment:
     name: develop
-    url: https://develop.$AUTO_DEVOPS_DOMAIN
+    url: https://develop-fast.$AUTO_DEVOPS_DOMAIN
   only:
     refs:
       - develop
