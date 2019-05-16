@@ -78,7 +78,7 @@ develop:
     url: https://develop-fast.$AUTO_DEVOPS_DOMAIN
   only:
     refs:
-      - develop-fast
+      - fast-dev
 
 
 
