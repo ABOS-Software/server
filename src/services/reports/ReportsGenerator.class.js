@@ -89,11 +89,20 @@ class ReportsGenerator {
     return data;
   }
 
+  safeString(data)  {
+    if (data instanceof Array) {
+      return data.toString().replace(',', '-&-');
+    }
+    else {
+      return data.toString();
+    }
+  }
+
   async getTemplateMetaData(jsonParams) {
     const seqClient = this.app.get('sequelizeClient');
     const year = seqClient.models['year'];
     let fileName = 'report.pdf';
-    let Category = jsonParams.Category || 'All';
+    let Category = this.safeString(jsonParams.Category) || 'All';
     let yearObj = await year.findByPk(jsonParams.Year);
     let yearText = yearObj.year;
 
@@ -130,6 +139,18 @@ class ReportsGenerator {
     }
   }
 
+  getCategoriesArray(jsonParams) {
+    if (!jsonParams.Category) {
+      return [];
+
+    }
+    if (jsonParams.Category instanceof Array) {
+      return jsonParams.Category;
+    } else {
+      return [jsonParams.Category];
+    }
+  }
+
   setLogoLocation(jsonParams) {
     if (!jsonParams.LogoLocation || !jsonParams.LogoLocation.base64) {
       jsonParams.LogoLocation = {base64: ''};
@@ -140,6 +161,7 @@ class ReportsGenerator {
   async generate(jsonParams) {
 
     let customers = this.getCustomersArray(jsonParams);
+    let cates = this.getCategoriesArray(jsonParams);
     let user = jsonParams.User;
     let {Splitting, fileName, Category, includeHeader} = await this.getTemplateMetaData(jsonParams);
     let formattedAddress = jsonParams.city + ', ' + jsonParams.state + ' ' + jsonParams.zipCode;
@@ -155,6 +177,7 @@ class ReportsGenerator {
       scoutPhone: jsonParams.Scout_Phone,
       logoLoc: jsonParams.LogoLocation.base64,
       category: Category,
+      categories: cates,
       customers: customers,
       user: user,
       includeSubUsers: jsonParams.Include_Sub_Users,

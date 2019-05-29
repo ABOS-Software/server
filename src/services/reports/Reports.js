@@ -36,10 +36,6 @@ module.exports = '<html>\n' +
   '\n' +
   '    table {\n' +
   '      width: 100%;\n' +
-  '' +
-  '' +
-  '' +
-  '' +
   '      margin: 0 0 0.4pt;text-indent: 0;\n' +
   '    }\n' +
   '\n' +
@@ -143,11 +139,17 @@ module.exports = '<html>\n' +
   '    </div>\n' +
   '\n' +
   '  </div>\n' +
-  '  {{#if prodTable}}\n' +
-  '\n' +
+  '  {{#each prodTable}}\n' +
+  '    <div>\n' +
+  '      {{#each specialInfoTop}}\n' +
+  '      <h2 class="specialInfo" style="text-align:center; position:relative">\n' +
+  '        {{text}}\n' +
+  '      </h2>\n' +
+  '      {{/each}}\n' +
+  '    </div>\n' +
   '  <table cellspacing="5" cellpadding="5" class="Bordered" style="width:100%; position:relative; padding-top:20px;clear:both;">\n' +
   '    <tr bgcolor="#9acd32">\n' +
-  '      {{#each ../column}}\n' +
+  '      {{#each ../../column}}\n' +
   '      <th style="text-align:left; border-bottom:1px solid black;">\n' +
   '        {{name}}\n' +
   '      </th>\n' +
@@ -216,7 +218,14 @@ module.exports = '<html>\n' +
   '    {{/if}}\n' +
   '\n' +
   '  </table>\n' +
-  '  {{/if}}\n' +
+  '  <div>\n' +
+  '    {{#each specialInfoBottom}}\n' +
+  '    <h2 class="specialInfo" style="text-align:center; position:relative">\n' +
+  '      {{text}}\n' +
+  '    </h2>\n' +
+  '    {{/each}}\n' +
+  '  </div>\n' +
+  '  {{/each}}\n' +
   '  <div>\n' +
   '    {{#each DonationThanks}}\n' +
   '    <h2 class="DonateGrat" style="text-align:center; position:relative; display:block; padding-top:80px; padding-bottom:20px; width:100%;">\n' +
@@ -252,4 +261,4 @@ module.exports = '<html>\n' +
   '\n' +
   '</body>\n' +
   '\n' +
-  '</html>';
+  '</html>\n';

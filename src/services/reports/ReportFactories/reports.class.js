@@ -161,13 +161,10 @@ module.exports = class reportsService {
 
   }
 
-  async getCategory(cust, inputs) {
+  async getCategory(cust, category, includeHeader) {
     const seqClient = this.app.get('sequelizeClient');
     const categories = seqClient.models['categories'];
-    const {
-      category,
-      includeHeader,
-    } = inputs;
+
     let cat;
     if (includeHeader) {
       cat = await categories.findOne({
@@ -210,28 +207,26 @@ module.exports = class reportsService {
     custYr.city = cust.city + ' ' + cust.state + ', ' + cust.zip_code;
     custYr.header = true;
     custYr.title = cust.customer_name + ' ' + cust.year.year + ' Order';
-    custYr.prodTable = true;
+
 
     return custYr;
   }
 
-  async getCustomerProductData(cust, custYr, inputs) {
+  async getCustomerProductData(cust, category) {
     let orderArray = cust.order.orderedProducts;
-    const {
-      category,
-    } = inputs;
+
     let pTable = await this.generateProductTable(orderArray, category);
     let tCost = pTable.totalCost;
+    let custYr = {};
     custYr.Product = pTable.Product;
     //quantityT += pTable.totalQuantity;
-    let donation = cust.donation;
+    let donation = cust.donation || 0;
     custYr.totalCost = tCost;
-    custYr = this.getDonationFields(custYr, donation);
     return {tCost: tCost + donation, tQuant: pTable.totalQuantity, data: custYr};
 
   }
 
-  doesCustomerHaveProducts(cust) {
+  doesCustomerHaveProducts(cust, category) {
     if (!cust.order) {
       return false;
     }
@@ -241,21 +236,34 @@ module.exports = class reportsService {
 
     let orderArray = cust.order.orderedProducts;
     const totalQuantity = orderArray.reduce((a, b) => {
-      return a + b.quantity;
+      if (b.products.category.category_name === category || category == "ALL") {
+        return a + b.quantity;
+      } else {return a;}
     }, 0);
     return (totalQuantity > 0);
   }
 
   async generateCustomerPage(cust, inputs, header = true) {
     let custYr = this.customerTemplate();
-    if (this.doesCustomerHaveProducts(cust)) {
-      let cat = await this.getCategory(cust, inputs);
-      custYr.custAddr = header;
-      custYr = this.getCustomerMetaFields(cust, custYr);
-      custYr.specialInfo = this.getSpecialInfos(inputs, cat, cust);
-      return this.getCustomerProductData(cust, custYr, inputs);
+    custYr.custAddr = header;
+    custYr = this.getCustomerMetaFields(cust, custYr);
+    let productTables =  [];
+    let retTCost = 0;
+    let retTQuant = 0;
+    for (const category of inputs.categories) {
+      if (this.doesCustomerHaveProducts(cust, category)) {
+        let cat = await this.getCategory(cust, category, inputs.includeHeader);
+        let {tCost, tQuant, data} = await this.getCustomerProductData(cust, category);
+        data.specialInfoTop = this.getSpecialInfos(inputs, cat, cust);
+        retTCost += tCost;
+        retTQuant += tQuant;
+        productTables.push(data);
+      }
     }
-    return {tCost: 0, tQuant: 0, data: custYr};
+    custYr = this.getDonationFields(custYr, cust.donation);
+
+    custYr.prodTable = productTables;
+    return {tCost: retTCost, tQuant: retTQuant, data: custYr};
 
   }
 
