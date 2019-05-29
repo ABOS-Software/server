@@ -271,39 +271,72 @@ module.exports = class reportsService {
     let custYr = this.customerTemplate();
     custYr.custAddr = header;
     custYr = this.getCustomerMetaFields(cust, custYr);
-    let productTables =  [];
-    let retTCost = 0;
-    let retTQuant = 0;
-    for (const [date, categories] of inputs.categories_grouped) {
+    if (inputs.category === 'All') {
+      let productTables = [];
+      let retTCost = 0;
+      let retTQuant = 0;
       let table = {
         Product: [],
         totalCost: 0.0,
         totalQuantity: 0
       };
-      table.specialInfoTop = this.getSpecialInfos(inputs, date, cust);
+      const category = inputs.category;
 
-      for (const category of categories) {
-        if (this.doesCustomerHaveProducts(cust, category)) {
-          let {tCost, tQuant, data} = await this.getCustomerProductData(cust, category);
-          table.Product = table.Product.concat(data.Product);
-          table.totalQuantity += tQuant;
-          table.totalCost += data.totalCost;
-          retTCost += tCost;
-          retTQuant += tQuant;
-        }
-      }
+      let {tCost, tQuant, data} = await this.getCustomerProductData(cust, category);
+      table.Product = table.Product.concat(data.Product);
+      table.totalQuantity += tQuant;
+      table.totalCost += data.totalCost;
+      retTCost += tCost;
+      retTQuant += tQuant;
+
+
       if (table.totalQuantity > 0) {
         productTables.push(table);
       }
+      custYr = this.getDonationFields(custYr, cust.donation);
+      custYr.specialInfoBottom = this.getPaymentInfo(cust, retTCost);
+      custYr.prodTable = productTables;
+      custYr.TotalCost = retTCost;
+      custYr.TotalQuantity = retTQuant;
+      custYr.GrandTotal = cust.donation + retTCost;
+      return {tCost: retTCost, tQuant: retTQuant, data: custYr};
+
+    } else {
+      let productTables = [];
+      let retTCost = 0;
+      let retTQuant = 0;
+      for (const [date, categories] of inputs.categories_grouped) {
+        let table = {
+          Product: [],
+          totalCost: 0.0,
+          totalQuantity: 0
+        };
+        table.specialInfoTop = this.getSpecialInfos(inputs, date, cust);
+
+        for (const category of categories) {
+          if (this.doesCustomerHaveProducts(cust, category)) {
+            let {tCost, tQuant, data} = await this.getCustomerProductData(cust, category);
+            table.Product = table.Product.concat(data.Product);
+            table.totalQuantity += tQuant;
+            table.totalCost += data.totalCost;
+            retTCost += tCost;
+            retTQuant += tQuant;
+          }
+        }
+        if (table.totalQuantity > 0) {
+          productTables.push(table);
+        }
+
+      }
+      custYr = this.getDonationFields(custYr, cust.donation);
+      custYr.specialInfoBottom = this.getPaymentInfo(cust, retTCost);
+      custYr.prodTable = productTables;
+      custYr.TotalCost = retTCost;
+      custYr.TotalQuantity = retTQuant;
+      custYr.GrandTotal = cust.donation + retTCost;
+      return {tCost: retTCost, tQuant: retTQuant, data: custYr};
 
     }
-    custYr = this.getDonationFields(custYr, cust.donation);
-    custYr.specialInfoBottom = this.getPaymentInfo(cust, retTCost);
-    custYr.prodTable = productTables;
-    custYr.TotalCost = retTCost;
-    custYr.TotalQuantity = retTQuant;
-    custYr.GrandTotal = cust.donation + retTCost;
-    return {tCost: retTCost, tQuant: retTQuant, data: custYr};
 
   }
 
