@@ -91,7 +91,7 @@ class ReportsGenerator {
 
   safeString(data)  {
     if (data instanceof Array) {
-      return data.toString().replace(',', '-&-');
+      return data.join('-&');
     }
     else {
       return data.toString();

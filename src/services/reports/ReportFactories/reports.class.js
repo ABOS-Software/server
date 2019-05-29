@@ -63,6 +63,7 @@ module.exports = class reportsService {
     let customerYrs = [];
     let tCostT = 0.0;
     let quantityT = 0;
+    inputs.categories_grouped = await this.groupCategories(inputs.categories, customers[0], true);
     for (const cust of customers) {
       let custYr = await this.generateCustomerPage(cust.dataValues, inputs);
       if (custYr.tQuant > 0) {
@@ -177,15 +178,15 @@ module.exports = class reportsService {
     return cat;
   }
 
-  getSpecialInfos(inputs, cat, cust) {
+  getSpecialInfos(inputs, delivery_date, cust) {
     const {
       category,
       includeHeader,
     } = inputs;
     let specialInfo = [];
-    if (includeHeader && category !== 'All' && cat) {
+    if (includeHeader && category !== 'All' && delivery_date) {
 
-      specialInfo.push({text: '*Notice: These products will be delivered to your house on ' + cat.delivery_date.toLocaleDateString() + ('. Total paid to date: $' + cust.order.amount_paid)});
+      specialInfo.push({text: '*Notice: These products will be delivered to your house on ' + delivery_date + ('. Total paid to date: $' + cust.order.amount_paid)});
 
     }
     return specialInfo;
@@ -236,11 +237,28 @@ module.exports = class reportsService {
 
     let orderArray = cust.order.orderedProducts;
     const totalQuantity = orderArray.reduce((a, b) => {
-      if (b.products.category.category_name === category || category == "ALL") {
+      if (b.products.category.category_name === category || category == 'ALL') {
         return a + b.quantity;
       } else {return a;}
     }, 0);
     return (totalQuantity > 0);
+  }
+
+  async groupCategories(categories, cust, includeHeader) {
+    let groups = new Map();
+    for (const category of categories) {
+      let cat = await this.getCategory(cust, category, includeHeader);
+      let catDate = cat.delivery_date.toLocaleDateString();
+      if (groups.has(catDate)) {
+        let dateVals = groups.get(catDate);
+        dateVals.push(cat.category_name);
+        groups.set(catDate, dateVals);
+      } else {
+        groups.set(catDate, [cat.category_name]);
+
+      }
+    }
+    return groups;
   }
 
   async generateCustomerPage(cust, inputs, header = true) {
@@ -250,15 +268,28 @@ module.exports = class reportsService {
     let productTables =  [];
     let retTCost = 0;
     let retTQuant = 0;
-    for (const category of inputs.categories) {
-      if (this.doesCustomerHaveProducts(cust, category)) {
-        let cat = await this.getCategory(cust, category, inputs.includeHeader);
-        let {tCost, tQuant, data} = await this.getCustomerProductData(cust, category);
-        data.specialInfoTop = this.getSpecialInfos(inputs, cat, cust);
-        retTCost += tCost;
-        retTQuant += tQuant;
-        productTables.push(data);
+    for (const [date, categories] of inputs.categories_grouped) {
+      let table = {
+        Product: [],
+        totalCost: 0.0,
+        totalQuantity: 0
+      };
+      table.specialInfoTop = this.getSpecialInfos(inputs, date, cust);
+
+      for (const category of categories) {
+        if (this.doesCustomerHaveProducts(cust, category)) {
+          let {tCost, tQuant, data} = await this.getCustomerProductData(cust, category);
+          table.Product = table.Product.concat(data.Product);
+          table.totalQuantity += tQuant;
+          table.totalCost += data.totalCost;
+          retTCost += tCost;
+          retTQuant += tQuant;
+        }
       }
+      if (table.totalQuantity > 0) {
+        productTables.push(table);
+      }
+
     }
     custYr = this.getDonationFields(custYr, cust.donation);
 
