@@ -5,16 +5,7 @@ class YearReport extends reportsService {
     super(options, app);
   }
 
-  async getCategory(category, selectedYear) {
-    const seqClient = this.app.get('sequelizeClient');
-    const categories = seqClient.models['categories'];
-    return await categories.findOne({
-      where: {
-        category_name: category,
-        year_id: selectedYear
-      }
-    });
-  }
+
 
   getCategoryWhere(category, cat) {
     let catWhere = {};
@@ -26,10 +17,9 @@ class YearReport extends reportsService {
 
 
 
-  async getOrderedProducts(inputs) {
+  async getOrderedProducts(category, inputs) {
     const {
       selectedYear,
-      category,
       user,
       includeSubUsers,
     } = inputs;
@@ -37,7 +27,7 @@ class YearReport extends reportsService {
     const categories = seqClient.models['categories'];
     const orderedProducts = seqClient.models['ordered_products'];
     const products = seqClient.models['products'];
-    let cat = await this.getCategory(category, selectedYear);
+    let cat = await this.getCategory(category, selectedYear, true);
     let catWhere = this.getCategoryWhere(category, cat);
     let where = await this.getGeneralFilter('year_id', selectedYear, inputs);
     return await orderedProducts.findAll({
@@ -49,22 +39,44 @@ class YearReport extends reportsService {
   }
 
   async generateCustYr(inputs) {
-    const {
-      category,
-    } = inputs;
     let custYr = this.customerTemplate();
-    let orderArray = await this.getOrderedProducts(inputs);
-    let pTable = await this.generateProductTable(orderArray, category);
-    let tCost = pTable.totalCost;
-    let quantityT = pTable.totalQuantity;
-
-    custYr.prodTable = true;
     custYr.custAddr = false;
+    custYr.prodTable = true;
     custYr.header = true;
-    custYr.totalCost = tCost;
-    custYr.quantityT = quantityT;
-    custYr.GrandTotal = tCost;
-    custYr.Product = pTable.Product;
+    let productTables =  [];
+    let retTCost = 0;
+    let retTQuant = 0;
+    for (const [date, categories] of inputs.categories_grouped) {
+      let table = {
+        Product: [],
+        totalCost: 0.0,
+        totalQuantity: 0
+      };
+
+      for (const category of categories) {
+        let orderArray = await this.getOrderedProducts(category, inputs);
+        let pTable = await this.generateProductTable(orderArray, category);
+        let tCost = pTable.totalCost;
+        let quantityT = pTable.totalQuantity;
+        table.Product = table.Product.concat(pTable.Product);
+        table.totalQuantity += quantityT;
+        table.totalCost += pTable.totalCost;
+        retTCost += tCost;
+        retTQuant += quantityT;
+
+      }
+      if (table.totalQuantity > 0) {
+        productTables.push(table);
+      }
+
+    }
+
+    custYr.prodTable = productTables;
+    custYr.TotalCost = retTCost;
+    custYr.TotalQuantity = retTQuant;
+    custYr.GrandTotal = retTCost;
+    //return {tCost: retTCost, tQuant: retTQuant, data: custYr};
+
     return custYr;
   }
 
@@ -78,6 +90,8 @@ class YearReport extends reportsService {
     } = inputs;
 
     let yr = await year.findByPk(selectedYear);
+    inputs.categories_grouped = await this.groupCategories(inputs.categories, yr.id, true);
+
     let data = {
       'customerYear': [],
       reportTitle: '',

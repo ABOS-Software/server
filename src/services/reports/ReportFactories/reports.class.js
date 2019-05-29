@@ -63,7 +63,7 @@ module.exports = class reportsService {
     let customerYrs = [];
     let tCostT = 0.0;
     let quantityT = 0;
-    inputs.categories_grouped = await this.groupCategories(inputs.categories, customers[0], true);
+    inputs.categories_grouped = await this.groupCategories(inputs.categories, customers[0].year_id, true);
     for (const cust of customers) {
       let custYr = await this.generateCustomerPage(cust.dataValues, inputs);
       if (custYr.tQuant > 0) {
@@ -162,7 +162,7 @@ module.exports = class reportsService {
 
   }
 
-  async getCategory(cust, category, includeHeader) {
+  async getCategory(year, category, includeHeader) {
     const seqClient = this.app.get('sequelizeClient');
     const categories = seqClient.models['categories'];
 
@@ -171,7 +171,7 @@ module.exports = class reportsService {
       cat = await categories.findOne({
         where: {
           category_name: category,
-          year_id: cust.year_id
+          year_id: year
         }
       });
     }
@@ -250,10 +250,10 @@ module.exports = class reportsService {
     return (totalQuantity > 0);
   }
 
-  async groupCategories(categories, cust, includeHeader) {
+  async groupCategories(categories, year, includeHeader) {
     let groups = new Map();
     for (const category of categories) {
-      let cat = await this.getCategory(cust, category, includeHeader);
+      let cat = await this.getCategory(year, category, includeHeader);
       let catDate = cat.delivery_date.toLocaleDateString();
       if (groups.has(catDate)) {
         let dateVals = groups.get(catDate);
