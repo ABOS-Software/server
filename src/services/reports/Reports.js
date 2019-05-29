@@ -142,9 +142,9 @@ module.exports = '<html>\n' +
   '  {{#each prodTable}}\n' +
   '    <div>\n' +
   '      {{#each specialInfoTop}}\n' +
-  '      <h2 class="specialInfo" style="text-align:center; position:relative">\n' +
+  '      <h4 class="specialInfo" style="text-align:center; position:relative">\n' +
   '        {{text}}\n' +
-  '      </h2>\n' +
+  '      </h4>\n' +
   '      {{/each}}\n' +
   '    </div>\n' +
   '  <table cellspacing="5" cellpadding="5" class="Bordered" style="width:100%; position:relative; padding-top:20px;clear:both;">\n' +
@@ -220,20 +220,61 @@ module.exports = '<html>\n' +
   '  </table>\n' +
   '  <div>\n' +
   '    {{#each specialInfoBottom}}\n' +
-  '    <h2 class="specialInfo" style="text-align:center; position:relative">\n' +
+  '    <h4 class="specialInfo" style="text-align:center; position:relative">\n' +
   '      {{text}}\n' +
-  '    </h2>\n' +
+  '    </h4>\n' +
   '    {{/each}}\n' +
   '  </div>\n' +
   '  {{/each}}\n' +
   '  <div>\n' +
   '    {{#each DonationThanks}}\n' +
-  '    <h2 class="DonateGrat" style="text-align:center; position:relative; display:block; padding-top:80px; padding-bottom:20px; width:100%;">\n' +
+  '    <h4 class="DonateGrat" style="text-align:center; position:relative; display:block; padding-top:80px; padding-bottom:20px; width:100%;">\n' +
   '      {{text}}\n' +
-  '    </h2>\n' +
+  '    </h4>\n' +
   '    {{/each}}\n' +
   '  </div>\n' +
+  '  <div>\n' +
+  '    {{#each specialInfoBottom}}\n' +
+  '    <h4 class="specialInfo" style="text-align:center; position:relative">\n' +
+  '      {{text}}\n' +
+  '    </h4>\n' +
+  '    {{/each}}\n' +
+  '  </div>\n' +
+  '  <div>\n' +
+  '    <table class="Bordered" border="0">\n' +
   '\n' +
+  '\n' +
+  '    <tr class="Bordered">\n' +
+  '\n' +
+  '      <td>Total Cost:</td>\n' +
+  '      <td class="Bordered">  {{TotalCost}}\n' +
+  '      </td>\n' +
+  '    </tr>\n' +
+  '    <tr class="Bordered">\n' +
+  '\n' +
+  '      <td>Total Quantity:</td>\n' +
+  '      <td class="Bordered"> {{TotalQuantity}}\n' +
+  '      </td>\n' +
+  '    </tr>\n' +
+  '    {{#if includeDonation}}\n' +
+  '    <tr class="UBordered">\n' +
+  '\n' +
+  '      <td class="Bordered">Total Pledged Donation:</td>\n' +
+  '      <td class="Bordered">\n' +
+  '        {{Donation}}\n' +
+  '      </td>\n' +
+  '    </tr>\n' +
+  '    <tr class="UBordered">\n' +
+  '\n' +
+  '      <td style="border-left:1px solid black;">Grand Total:</td>\n' +
+  '      <td style="border-left:1px solid black;">\n' +
+  '        {{GrandTotal}}\n' +
+  '\n' +
+  '      </td>\n' +
+  '    </tr>\n' +
+  '    {{/if}}\n' +
+  '  </table>\n' +
+  '  </div>\n' +
   '</div>\n' +
   '{{/each}}\n' +
   '<h2 style="text-align:right; position:relative;">\n' +

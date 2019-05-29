@@ -186,10 +186,17 @@ module.exports = class reportsService {
     let specialInfo = [];
     if (includeHeader && category !== 'All' && delivery_date) {
 
-      specialInfo.push({text: '*Notice: These products will be delivered to your house on ' + delivery_date + ('. Total paid to date: $' + cust.order.amount_paid)});
+      specialInfo.push({text: '*Notice: These products will be delivered to your house on ' + delivery_date + ('.')});
 
     }
     return specialInfo;
+  }
+
+  getPaymentInfo(cust, tCost) {
+    let specialInfo = [];
+    specialInfo.push({text: 'Total paid to date: $' + cust.order.amount_paid + ' out of $' + tCost + ' due total. See Individual Delivery tables for specific payment requirements.'});
+    return specialInfo;
+
   }
 
   getDonationFields(custYr, donation) {
@@ -221,9 +228,8 @@ module.exports = class reportsService {
     let custYr = {};
     custYr.Product = pTable.Product;
     //quantityT += pTable.totalQuantity;
-    let donation = cust.donation || 0;
     custYr.totalCost = tCost;
-    return {tCost: tCost + donation, tQuant: pTable.totalQuantity, data: custYr};
+    return {tCost: tCost, tQuant: pTable.totalQuantity, data: custYr};
 
   }
 
@@ -292,8 +298,11 @@ module.exports = class reportsService {
 
     }
     custYr = this.getDonationFields(custYr, cust.donation);
-
+    custYr.specialInfoBottom = this.getPaymentInfo(cust, retTCost);
     custYr.prodTable = productTables;
+    custYr.TotalCost = retTCost;
+    custYr.TotalQuantity = retTQuant;
+    custYr.GrandTotal = cust.donation + retTCost;
     return {tCost: retTCost, tQuant: retTQuant, data: custYr};
 
   }

@@ -142,9 +142,9 @@
   {{#each prodTable}}
     <div>
       {{#each specialInfoTop}}
-      <h2 class="specialInfo" style="text-align:center; position:relative">
+      <h4 class="specialInfo" style="text-align:center; position:relative">
         {{text}}
-      </h2>
+      </h4>
       {{/each}}
     </div>
   <table cellspacing="5" cellpadding="5" class="Bordered" style="width:100%; position:relative; padding-top:20px;clear:both;">
@@ -220,20 +220,61 @@
   </table>
   <div>
     {{#each specialInfoBottom}}
-    <h2 class="specialInfo" style="text-align:center; position:relative">
+    <h4 class="specialInfo" style="text-align:center; position:relative">
       {{text}}
-    </h2>
+    </h4>
     {{/each}}
   </div>
   {{/each}}
   <div>
     {{#each DonationThanks}}
-    <h2 class="DonateGrat" style="text-align:center; position:relative; display:block; padding-top:80px; padding-bottom:20px; width:100%;">
+    <h4 class="DonateGrat" style="text-align:center; position:relative; display:block; padding-top:80px; padding-bottom:20px; width:100%;">
       {{text}}
-    </h2>
+    </h4>
     {{/each}}
   </div>
+  <div>
+    {{#each specialInfoBottom}}
+    <h4 class="specialInfo" style="text-align:center; position:relative">
+      {{text}}
+    </h4>
+    {{/each}}
+  </div>
+  <div>
+    <table class="Bordered" border="0">
 
+
+    <tr class="Bordered">
+
+      <td>Total Cost:</td>
+      <td class="Bordered">  {{TotalCost}}
+      </td>
+    </tr>
+    <tr class="Bordered">
+
+      <td>Total Quantity:</td>
+      <td class="Bordered"> {{TotalQuantity}}
+      </td>
+    </tr>
+    {{#if includeDonation}}
+    <tr class="UBordered">
+
+      <td class="Bordered">Total Pledged Donation:</td>
+      <td class="Bordered">
+        {{Donation}}
+      </td>
+    </tr>
+    <tr class="UBordered">
+
+      <td style="border-left:1px solid black;">Grand Total:</td>
+      <td style="border-left:1px solid black;">
+        {{GrandTotal}}
+
+      </td>
+    </tr>
+    {{/if}}
+  </table>
+  </div>
 </div>
 {{/each}}
 <h2 style="text-align:right; position:relative;">
