@@ -251,6 +251,9 @@ module.exports = class reportsService {
   }
 
   async groupCategories(categories, year, includeHeader) {
+    if (categories.includes('All')) {
+      return new Map();
+    }
     let groups = new Map();
     for (const category of categories) {
       let cat = await this.getCategory(year, category, includeHeader);

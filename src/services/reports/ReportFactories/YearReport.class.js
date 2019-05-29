@@ -43,41 +43,74 @@ class YearReport extends reportsService {
     custYr.custAddr = false;
     custYr.prodTable = true;
     custYr.header = true;
-    let productTables =  [];
-    let retTCost = 0;
-    let retTQuant = 0;
-    for (const [date, categories] of inputs.categories_grouped) {
+    if (inputs.category === 'All') {
+      let productTables = [];
+      let retTCost = 0;
+      let retTQuant = 0;
       let table = {
         Product: [],
         totalCost: 0.0,
         totalQuantity: 0
       };
+      const category = inputs.category;
 
-      for (const category of categories) {
-        let orderArray = await this.getOrderedProducts(category, inputs);
-        let pTable = await this.generateProductTable(orderArray, category);
-        let tCost = pTable.totalCost;
-        let quantityT = pTable.totalQuantity;
-        table.Product = table.Product.concat(pTable.Product);
-        table.totalQuantity += quantityT;
-        table.totalCost += pTable.totalCost;
-        retTCost += tCost;
-        retTQuant += quantityT;
+      let orderArray = await this.getOrderedProducts(category, inputs);
+      let pTable = await this.generateProductTable(orderArray, category);
+      let tCost = pTable.totalCost;
+      let quantityT = pTable.totalQuantity;
+      table.Product = table.Product.concat(pTable.Product);
+      table.totalQuantity += quantityT;
+      table.totalCost += pTable.totalCost;
+      retTCost += tCost;
+      retTQuant += quantityT;
 
-      }
+
       if (table.totalQuantity > 0) {
         productTables.push(table);
       }
+      custYr.prodTable = productTables;
+      custYr.TotalCost = retTCost;
+      custYr.TotalQuantity = retTQuant;
+      custYr.GrandTotal = retTCost;
+      return custYr;
 
+    } else {
+      let productTables = [];
+      let retTCost = 0;
+      let retTQuant = 0;
+      for (const [date, categories] of inputs.categories_grouped) {
+        let table = {
+          Product: [],
+          totalCost: 0.0,
+          totalQuantity: 0
+        };
+
+        for (const category of categories) {
+          let orderArray = await this.getOrderedProducts(category, inputs);
+          let pTable = await this.generateProductTable(orderArray, category);
+          let tCost = pTable.totalCost;
+          let quantityT = pTable.totalQuantity;
+          table.Product = table.Product.concat(pTable.Product);
+          table.totalQuantity += quantityT;
+          table.totalCost += pTable.totalCost;
+          retTCost += tCost;
+          retTQuant += quantityT;
+
+        }
+        if (table.totalQuantity > 0) {
+          productTables.push(table);
+        }
+
+      }
+
+      custYr.prodTable = productTables;
+      custYr.TotalCost = retTCost;
+      custYr.TotalQuantity = retTQuant;
+      custYr.GrandTotal = retTCost;
+      //return {tCost: retTCost, tQuant: retTQuant, data: custYr};
+
+      return custYr;
     }
-
-    custYr.prodTable = productTables;
-    custYr.TotalCost = retTCost;
-    custYr.TotalQuantity = retTQuant;
-    custYr.GrandTotal = retTCost;
-    //return {tCost: retTCost, tQuant: retTQuant, data: custYr};
-
-    return custYr;
   }
 
   async generateData(inputs) {
