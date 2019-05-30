@@ -1,4 +1,7 @@
 const {ValidationError} = require('sequelize');
+const Ajv = require('ajv');
+const {validateSchema} = require('feathers-hooks-common');
+const {customersCreate, customersEdit} = require('../../schemas');
 const {ordersInc, yearInc} = require('../../models/includes');
 
 const {customerAttr, userAttr} = require('../../models/attributes');
@@ -349,8 +352,8 @@ module.exports = {
     all: [authenticate('jwt'), checkPermissions(['ROLE_USER']), filterManagedUsers()],
     find: [sequelizeParams(), fuzzySearch()],
     get: [sequelizeParams()],
-    create: [prepOrder()],
-    update: [prepOrder()],
+    create: [validateSchema(customersCreate, Ajv), prepOrder()],
+    update: [validateSchema(customersEdit, Ajv), prepOrder()],
     patch: [],
     remove: []
   },

@@ -1,4 +1,7 @@
 const {authenticate} = require('@feathersjs/authentication').hooks;
+const Ajv = require('ajv');
+const {validateSchema} = require('feathers-hooks-common');
+const {userCreate, userEdit} = require('../../schemas');
 const checkPermissions = require('../../hooks/check-permissions');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
 const {
@@ -21,8 +24,8 @@ module.exports = {
   before: {
     all: [authenticate('jwt')],
 
-    create: [hashPassword(), checkPermissions(['ROLE_ADMIN'])],
-    update: [hashPassword(), checkPermissions(['ROLE_ADMIN'])],
+    create: [validateSchema(userCreate, Ajv), hashPassword(), checkPermissions(['ROLE_ADMIN'])],
+    update: [validateSchema(userEdit, Ajv) , hashPassword(), checkPermissions(['ROLE_ADMIN'])],
     patch: [hashPassword(), checkPermissions(['ROLE_ADMIN'])],
     remove: [checkPermissions(['ROLE_ADMIN'])],
     find: [sequelizeParams(), authenticate('jwt'), filterManagedUsers({field: 'id'})],

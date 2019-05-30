@@ -1,4 +1,7 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
+const Ajv = require('ajv');
+const {validateSchema} = require('feathers-hooks-common');
+const {paymentsCreate, paymentsEdit} = require('../../schemas');
 const checkPermissions = require('../../hooks/check-permissions');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
 const sequelizeParams = () => {
@@ -55,8 +58,8 @@ module.exports = {
     all: [ authenticate('jwt'), checkPermissions(['ROLE_USER']), filterManagedUsers({createField: 'user_id'}) ],
     find: [sequelizeParams()] ,
     get: [sequelizeParams()],
-    create: [],
-    update: [update()],
+    create: [validateSchema(paymentsCreate, Ajv)],
+    update: [validateSchema(paymentsEdit, Ajv), update()],
     patch: [],
     remove: []
   },

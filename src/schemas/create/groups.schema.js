@@ -1,43 +1,23 @@
+/*eslint quotes: ["error", "double"]*/
 const schema = {
-  'definitions': {},
-  '$schema': 'http://json-schema.org/draft-07/schema#',
-  '$id': 'http://example.com/root.json',
-  'type': 'object',
-  'required': [
-    'order',
-    'GroupName',
-    'year'
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "required": [
+    "groupName",
+    "year_id"
   ],
-  'properties': {
-    'order': {
-      '$id': '#/properties/order',
-      'type': 'object',
-      'required': [
-        'cost',
-        'delivered'
-      ],
-      'properties': {
-        'cost': {
-          '$id': '#/properties/order/properties/cost',
-          'type': 'string',
-          'default': ''
-        },
-        'delivered': {
-          '$id': '#/properties/order/properties/delivered',
-          'type': 'boolean',
-          'default': false
-        }
-      }
+  "properties": {
+    "groupName": {
+      "$id": "#/properties/groupName",
+      "type": "string",
+      "default": ""
     },
-    'GroupName': {
-      '$id': '#/properties/GroupName',
-      'type': 'string',
-      'default': ''
-    },
-    'year': {
-      '$id': '#/properties/year',
-      'type': 'integer',
-      'default': 0
+    "year_id": {
+      "$id": "#/properties/year_id",
+      "type": "integer",
+      "default": 0
     }
   }
 };

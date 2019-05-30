@@ -1,4 +1,7 @@
 const {authenticate} = require('@feathersjs/authentication').hooks;
+const Ajv = require('ajv');
+const {validateSchema} = require('feathers-hooks-common');
+const {groupsCreate, groupsEdit} = require('../../schemas');
 const checkPermissions = require('../../hooks/check-permissions');
 const sequelizeParams = () => {
   return async context => {
@@ -20,7 +23,7 @@ const sequelizeParams = () => {
 const addUpdateData = () => {
   return async context => {
     context.data.group_name = context.data.groupName;
-    context.data.year_id = context.data.year;
+    //context.data.year_id = context.data.year;
     return context;
   };
 };
@@ -29,8 +32,8 @@ module.exports = {
     all: [authenticate('jwt'), checkPermissions(['ROLE_USER'])],
     find: [sequelizeParams()],
     get: [sequelizeParams()],
-    create: [addUpdateData(), checkPermissions(['ROLE_ADMIN'])],
-    update: [addUpdateData(), checkPermissions(['ROLE_ADMIN'])],
+    create: [validateSchema(groupsCreate, Ajv), addUpdateData(), checkPermissions(['ROLE_ADMIN'])],
+    update: [validateSchema(groupsEdit, Ajv), addUpdateData(), checkPermissions(['ROLE_ADMIN'])],
     patch: [addUpdateData(), checkPermissions(['ROLE_ADMIN'])],
     remove: [checkPermissions(['ROLE_ADMIN'])]
   },

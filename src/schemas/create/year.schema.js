@@ -1,37 +1,17 @@
+/*eslint quotes: ["error", "double"]*/
 const schema = {
-  'definitions': {},
-  '$schema': 'http://json-schema.org/draft-07/schema#',
-  '$id': 'http://example.com/root.json',
-  'type': 'object',
-  'required': [
-    'order',
-    'year'
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "required": [
+    "year"
   ],
-  'properties': {
-    'order': {
-      '$id': '#/properties/order',
-      'type': 'object',
-      'required': [
-        'cost',
-        'delivered'
-      ],
-      'properties': {
-        'cost': {
-          '$id': '#/properties/order/properties/cost',
-          'type': 'string',
-          'default': ''
-        },
-        'delivered': {
-          '$id': '#/properties/order/properties/delivered',
-          'type': 'boolean',
-          'default': false
-        }
-      }
-    },
-    'year': {
-      '$id': '#/properties/year',
-      'type': 'string',
-      'default': ''
+  "properties": {
+    "year": {
+      "$id": "#/properties/year",
+      "type": "string",
+      "default": ""
     }
   }
 };
