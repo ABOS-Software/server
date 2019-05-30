@@ -19,7 +19,7 @@ const sequelizeParams = () => {
 };
 const addUpdateData = () => {
   return async context => {
-    context.data.group_name = context.data.GroupName;
+    context.data.group_name = context.data.groupName;
     context.data.year_id = context.data.year;
     return context;
   };
