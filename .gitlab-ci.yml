@@ -79,7 +79,7 @@ test:
     MYSQL_ROOT_PASSWORD: $mysql_PASSWORD
     NODE_ENV: test
   stage: test
-  image: ikudinov/puppeteer-gitlab-ci:latest
+  image: buildkite/puppeteer:latest
   before_script:
 
   after_script:
