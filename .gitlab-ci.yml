@@ -98,6 +98,9 @@ test:
   except:
     variables:
       - $TEST_DISABLED
+  artifacts:
+    paths:
+      - test/outputFiles/
 
 code_quality:
   stage: test

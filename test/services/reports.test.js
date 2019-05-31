@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const assert = require('assert');
+const fs = require('fs');
 const app = require('../../src/app');
 const request = require('supertest');
 const {completeSample} = require('../../src/databaseCreators');
@@ -43,7 +44,7 @@ describe('\'reports\' service', () => {
   });
   step('generatesSplitReport', function (done) {
     this.timeout(10000);
-
+    const stream = fs.createWriteStream('test/outputFiles/report-' + new Date().toISOString() + '-test.pdf');
     request(app)
       .post('/Reports')
       .send(
@@ -71,7 +72,9 @@ describe('\'reports\' service', () => {
       .expect(200)
       .expect('content-type', 'application/pdf')
       .expect('content-disposition','attachment; filename=1234_customer_orders_P.pdf')
-      .expect('content-length', '49535', done);
+      .expect('content-length', '49535')
+      .pipe(stream)
+      .on('finish', done);
 
   });
 });
