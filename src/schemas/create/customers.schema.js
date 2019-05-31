@@ -9,12 +9,10 @@ const schema = {
     "year",
     "customerName",
     "phone",
-    "custEmail",
     "streetAddress",
     "city",
     "state",
     "zipCode",
-    "donation",
     "user"
   ],
   "properties": {
