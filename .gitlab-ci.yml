@@ -80,10 +80,9 @@ test:
     NODE_ENV: test
   stage: test
   image: buildkite/puppeteer:latest
-  before_script:
-    - mkdir test/outputFiles
   after_script:
   script:
+    - mkdir test/outputFiles
     - wget https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
     - chmod +x ./cc-test-reporter
     - ./cc-test-reporter before-build
