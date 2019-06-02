@@ -29,9 +29,17 @@ module.exports = {
       (context) => {
       // Get the Sequelize instance. In the generated application via:
       //  const sequelize = context.app.get('sequelizeClient');
+        console.log(context.data);
+        for (const element in context.data) {
+          context.data[element].category_name = context.data[element].categoryName;
+          context.data[element].delivery_date = context.data[element].deliveryDate;
+          context.data[element].year_id = context.data[element].year;
+        }
         context.data.category_name = context.data.categoryName;
         context.data.delivery_date = context.data.deliveryDate;
         context.data.year_id = context.data.year;
+        console.log(context.data);
+
         return context;
       }],
     update: [validateSchema(categoriesEdit, Ajv),(context) => {
