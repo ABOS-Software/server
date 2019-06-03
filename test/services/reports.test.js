@@ -10,8 +10,10 @@ const {createProducts} = require('../../src/databaseCreators/products');
 const {createCategories} = require('../../src/databaseCreators/categories');
 const {cleanup} = require('../../src/databaseCreators/cleanup');
 describe('\'reports\' service', () => {
+  let reportsConfig = {};
   before(async function(done) {
     done();
+    reportsConfig = app.get('reports');
   });
 
   step('Creating Years', function(done)  {
@@ -73,7 +75,7 @@ describe('\'reports\' service', () => {
       .expect(200)
       .expect('content-type', 'application/pdf')
       .expect('content-disposition','attachment; filename=1234_customer_orders_P.pdf')
-      .expect('content-length', '51395')
+      .expect('content-length', reportsConfig.splitSize)
       .end((err, res) => {
         stream.end(res.body);
         stream.on('finish', () => {
@@ -113,7 +115,7 @@ describe('\'reports\' service', () => {
       .expect(200)
       .expect('content-type', 'application/pdf')
       .expect('content-disposition','attachment; filename=1234_Total_Orders_P.pdf')
-      .expect('content-length', '46368', done)
+      .expect('content-length', reportsConfig.yearSize)
       .end((err, res) => {
         stream.end(res.body);
         stream.on('finish', () => {
@@ -153,7 +155,7 @@ describe('\'reports\' service', () => {
       .expect(200)
       .expect('content-type', 'application/pdf')
       .expect('content-disposition','attachment; filename=Individual_1234_Order_P.pdf')
-      .expect('content-length', '49242')
+      .expect('content-length', reportsConfig.customerSize)
       .end((err, res) => {
         stream.end(res.body);
         stream.on('finish', () => {
@@ -189,7 +191,7 @@ describe('\'reports\' service', () => {
       .expect(200)
       .expect('content-type', 'application/pdf')
       .expect('content-disposition','attachment; filename=Individual_historical_orders.pdf')
-      .expect('content-length', '53846')
+      .expect('content-length', reportsConfig.historicalSize)
       .end((err, res) => {
         stream.end(res.body);
         stream.on('finish', () => {

@@ -9,6 +9,13 @@
   "serviceOptions": {
     "raw": false
   },
+  "reports": {
+    "splitSize": "47578",
+    "yearSize": "41501",
+    "customerSize": "45182",
+    "historicalSize": "50166"
+
+  },
   "mysql": {
     "database": "sequelize_test",
     "username": "root",
