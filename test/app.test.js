@@ -44,10 +44,18 @@ before(async function () {
           'full_name': 'test Name'
         }).then(user => {
           assert.ok(user, 'User Creation Failed');
+          console.log(user);
           user.should.hasOwnProperty('role_id', 'NO Role_ID').above(0, 'NO ROLE ASSIGNED');
+          console.log('3');
+
           user.should.hasOwnProperty('username', 'NO username').equal('test', 'Username not saved correctly');
+          console.log('4');
+
           user.should.hasOwnProperty('full_name', 'NO full_name').equal('test Name', 'full name not saved correctly');
+          console.log('5');
+
         });
+        console.log('auth');
         await request(app)
           .post('/authentication')
           .send({

@@ -4,6 +4,9 @@ const {validateSchema} = require('feathers-hooks-common');
 const {userCreate, userEdit} = require('../../schemas');
 const checkPermissions = require('../../hooks/check-permissions');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
+const makeArray = require('../../hooks/makeArray');
+const DeArray = require('../../hooks/DeArray');
+
 const {
   hashPassword, protect
 } = require('@feathersjs/authentication-local').hooks;
@@ -60,28 +63,31 @@ module.exports = {
       });
 
     }],
-    create: [async function (context) {
-      const sequelize = context.app.get('sequelizeClient');
-      const user_role = sequelize.models['user_role'];
-      const role = sequelize.models['role'];
-      const authority = await role.findOne({where: {authority: 'ROLE_USER'}});
-      let ret;
-      if (authority) {
-        ret = await user_role.create({user_id: context.result.id, role_id: authority.id});
-      }
-      else {
-        ret = await user_role.create({user_id: context.result.id, role_id: 0});
+    create: [makeArray(), async function (context) {
+      for (let resultKey in context.result) {
+        const sequelize = context.app.get('sequelizeClient');
+        const user_role = sequelize.models['user_role'];
+        const role = sequelize.models['role'];
+        const authority = await role.findOne({where: {authority: 'ROLE_USER'}});
+        let ret;
+        if (authority) {
+          ret = await user_role.create({user_id: context.result[resultKey].id, role_id: authority.id});
+        }
+        else {
+          ret = await user_role.create({user_id: context.result[resultKey].id, role_id: 0});
+
+        }
+        /*      context.data.role_id = ret.id;
+              context.result[resultKey].role_id = role_id;*/
+        context.result[resultKey] = {
+          'username': context.result[resultKey].username, 'password': context.result[resultKey].password,
+          'full_name': context.result[resultKey].full_name, 'role_id': ret.id,
+        };
 
       }
-      /*      context.data.role_id = ret.id;
-            context.result.role_id = role_id;*/
-      context.result = {
-        'username': context.result.username, 'password': context.result.password,
-        'full_name': context.result.full_name, 'role_id': ret.id,
-      };
       return context;
-    }],
-    update: [],
+    }, DeArray()],
+    update: [DeArray()],
     patch: [],
     remove: []
   },

@@ -90,6 +90,9 @@ class ReportsGenerator {
   }
 
   safeString(data)  {
+    if (data === undefined) {
+      return '';
+    }
     if (data instanceof Array) {
       return data.join('-&');
     }
@@ -103,7 +106,7 @@ class ReportsGenerator {
     const year = seqClient.models['year'];
     let fileName = 'report.pdf';
     let Category = this.safeString(jsonParams.Category) || 'All';
-    let yearObj = await year.findByPk(jsonParams.Year);
+    let yearObj = await year.findByPk(jsonParams.Year) || {year : ''};
     let yearText = yearObj.year;
 
     switch (jsonParams.template) {

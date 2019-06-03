@@ -4,6 +4,9 @@ const {validateSchema} = require('feathers-hooks-common');
 const {notesCreate, notesEdit} = require('../../schemas');
 const checkPermissions = require('../../hooks/check-permissions');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
+const makeArray = require('../../hooks/makeArray');
+const DeArray = require('../../hooks/DeArray');
+
 const sequelizeParams = () => {
   return async context => {
     const seqClient = context.app.get('sequelizeClient');
@@ -26,7 +29,10 @@ const sequelizeParams = () => {
 
 const update = () => {
   return async context => {
-    context.data.note_code_id = context.data.note_code.id;
+    for (let dataKey in context.data) {
+      context.data[dataKey].note_code_id = context.data[dataKey].note_code.id;
+
+    }
     return context;
   };
 
@@ -39,8 +45,8 @@ module.exports = {
     all: [ authenticate('jwt'), checkPermissions(['ROLE_USER']), filterManagedUsers({createField: 'user_id'}) ],
     find: [sequelizeParams()] ,
     get: [sequelizeParams()],
-    create: [validateSchema(notesCreate, Ajv) ],
-    update: [validateSchema(notesEdit, Ajv), update()],
+    create: [validateSchema(notesCreate, Ajv), makeArray() ],
+    update: [validateSchema(notesEdit, Ajv), makeArray(), update()],
     patch: [],
     remove: []
   },
@@ -49,8 +55,8 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [],
-    update: [],
+    create: [DeArray()],
+    update: [DeArray()],
     patch: [],
     remove: []
   },

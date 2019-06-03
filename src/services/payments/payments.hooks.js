@@ -4,6 +4,9 @@ const {validateSchema} = require('feathers-hooks-common');
 const {paymentsCreate, paymentsEdit} = require('../../schemas');
 const checkPermissions = require('../../hooks/check-permissions');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
+const makeArray = require('../../hooks/makeArray');
+const DeArray = require('../../hooks/DeArray');
+
 const sequelizeParams = () => {
   return async context => {
     const seqClient = context.app.get('sequelizeClient');
@@ -32,7 +35,9 @@ const sequelizeParams = () => {
 };
 const update = () => {
   return async context => {
-    context.data.payment_method_id = context.data.payment_method.id;
+    for (let dataKey in context.data) {
+      context.data[dataKey].payment_method_id = context.data[dataKey].payment_method.id;
+    }
     return context;
   };
 
@@ -41,15 +46,19 @@ const update = () => {
 
 const updateAmountPaid = () => {
   return async context => {
-    const seqClient = context.app.get('sequelizeClient');
+    for (let resultKey in context.result) {
+      const seqClient = context.app.get('sequelizeClient');
 
-    const orders = seqClient.models['orders'];
-    const paymentsM = seqClient.models['payments'];
-    let order = await orders.findOne({where: {customer_id: context.result.customer_id}});
-    let totalPaid = await paymentsM.sum('amount', {where: {customer_id: context.result.customer_id}});
+      const orders = seqClient.models['orders'];
+      const paymentsM = seqClient.models['payments'];
+      let order = await orders.findOne({where: {customer_id: context.result[resultKey].customer_id}});
+      let totalPaid = await paymentsM.sum('amount', {where: {customer_id: context.result[resultKey].customer_id}});
 
-    order.amount_paid = totalPaid;
-    await order.save();
+      order.amount_paid = totalPaid;
+      await order.save();
+
+    }
+
     return context;
   };
 };
@@ -58,8 +67,8 @@ module.exports = {
     all: [ authenticate('jwt'), checkPermissions(['ROLE_USER']), filterManagedUsers({createField: 'user_id'}) ],
     find: [sequelizeParams()] ,
     get: [sequelizeParams()],
-    create: [validateSchema(paymentsCreate, Ajv)],
-    update: [validateSchema(paymentsEdit, Ajv), update()],
+    create: [validateSchema(paymentsCreate, Ajv), makeArray(),],
+    update: [validateSchema(paymentsEdit, Ajv), makeArray(), update()],
     patch: [],
     remove: []
   },
@@ -68,10 +77,10 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [updateAmountPaid()],
-    update: [updateAmountPaid()],
-    patch: [updateAmountPaid()],
-    remove: [updateAmountPaid()]
+    create: [makeArray(), updateAmountPaid(), DeArray()],
+    update: [makeArray(), updateAmountPaid(),DeArray()],
+    patch: [makeArray(), updateAmountPaid(), DeArray()],
+    remove: [makeArray(), updateAmountPaid(), DeArray()]
   },
 
   error: {
