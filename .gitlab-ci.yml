@@ -85,12 +85,12 @@ test:
     - mkdir test/outputFiles
     - wget https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
     - chmod +x ./cc-test-reporter
-    - ./cc-test-reporter before-build
+    - ./cc-test-reporter before-build --debug
     - setup_test_db
     - yarn --dev install
     - yarn run coverage
     - yarn nyc report --reporter=lcov
-    - ./cc-test-reporter after-build
+    - ./cc-test-reporter after-build --debug
 
   only:
     - branches

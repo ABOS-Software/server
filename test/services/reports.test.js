@@ -3,7 +3,6 @@ const assert = require('assert');
 const fs = require('fs');
 const app = require('../../src/app');
 const request = require('supertest');
-const {completeSample} = require('../../src/databaseCreators');
 const {createYears} = require('../../src/databaseCreators/years');
 const {createCustomers} = require('../../src/databaseCreators/customers');
 const {createProducts} = require('../../src/databaseCreators/products');
