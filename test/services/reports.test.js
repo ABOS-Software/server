@@ -8,6 +8,7 @@ const {createYears} = require('../../src/databaseCreators/years');
 const {createCustomers} = require('../../src/databaseCreators/customers');
 const {createProducts} = require('../../src/databaseCreators/products');
 const {createCategories} = require('../../src/databaseCreators/categories');
+const {cleanup} = require('../../src/databaseCreators/cleanup');
 describe('\'reports\' service', () => {
   before(async function(done) {
     done();
@@ -42,7 +43,7 @@ describe('\'reports\' service', () => {
     });
 
   });
-  step('generatesSplitReport', function (done) {
+  it('generatesSplitReport', function (done) {
     this.timeout(10000);
     const stream = fs.createWriteStream('test/outputFiles/report-split' + new Date().toISOString() + '-test.pdf');
     request(app)
@@ -72,11 +73,17 @@ describe('\'reports\' service', () => {
       .expect(200)
       .expect('content-type', 'application/pdf')
       .expect('content-disposition','attachment; filename=1234_customer_orders_P.pdf')
-      .expect('content-length', '49535')
-      .pipe(stream)
-      .on('finish', done);
+      .expect('content-length', '51395')
+      .end((err, res) => {
+        stream.end(res.body);
+        stream.on('finish', () => {
+          if (err) return done(err);
+          done();
+        });
+      });
+
   });
-  step('generateYearReport', function (done) {
+  it('generateYearReport', function (done) {
     this.timeout(10000);
     const stream = fs.createWriteStream('test/outputFiles/report-year-' + new Date().toISOString() + '-test.pdf');
     request(app)
@@ -105,12 +112,17 @@ describe('\'reports\' service', () => {
       .set('Authorization', app.get('TEST_JWT_TOKEN'))
       .expect(200)
       .expect('content-type', 'application/pdf')
-      .expect('content-disposition','attachment; filename=1234_customer_orders_P.pdf')
-      .expect('content-length', '49535')
-      .pipe(stream)
-      .on('finish', done);
+      .expect('content-disposition','attachment; filename=1234_Total_Orders_P.pdf')
+      .expect('content-length', '46368', done)
+      .end((err, res) => {
+        stream.end(res.body);
+        stream.on('finish', () => {
+          if (err) return done(err);
+          done();
+        });
+      });
   });
-  step('generateCustomerReport', function (done) {
+  it('generateCustomerReport', function (done) {
     this.timeout(10000);
     const stream = fs.createWriteStream('test/outputFiles/report-Customer-' + new Date().toISOString() + '-test.pdf');
     request(app)
@@ -140,12 +152,17 @@ describe('\'reports\' service', () => {
       .set('Authorization', app.get('TEST_JWT_TOKEN'))
       .expect(200)
       .expect('content-type', 'application/pdf')
-      .expect('content-disposition','attachment; filename=1234_customer_orders_P.pdf')
-      .expect('content-length', '49535')
-      .pipe(stream)
-      .on('finish', done);
+      .expect('content-disposition','attachment; filename=Individual_1234_Order_P.pdf')
+      .expect('content-length', '49242')
+      .end((err, res) => {
+        stream.end(res.body);
+        stream.on('finish', () => {
+          if (err) return done(err);
+          done();
+        });
+      });
   });
-  step('generatesHistoricalReport', function (done) {
+  it('generatesHistoricalReport', function (done) {
     this.timeout(10000);
     const stream = fs.createWriteStream('test/outputFiles/report-historical-' + new Date().toISOString() + '-test.pdf');
     request(app)
@@ -171,10 +188,22 @@ describe('\'reports\' service', () => {
       .set('Authorization', app.get('TEST_JWT_TOKEN'))
       .expect(200)
       .expect('content-type', 'application/pdf')
-      .expect('content-disposition','attachment; filename=1234_customer_orders_P.pdf')
-      .expect('content-length', '49535')
-      .pipe(stream)
-      .on('finish', done);
+      .expect('content-disposition','attachment; filename=Individual_historical_orders.pdf')
+      .expect('content-length', '53846')
+      .end((err, res) => {
+        stream.end(res.body);
+        stream.on('finish', () => {
+          if (err) return done(err);
+          done();
+        });
+      });
+  });
+  step('Cleanup', function(done)  {
+    this.timeout(10000);
+
+    cleanup(app).then((res, err) => {
+      done(err);
+    });
   });
 
 });
