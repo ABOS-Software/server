@@ -69,6 +69,7 @@
     "nyc": "^13.1.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
+    "rewire": "^4.0.1",
     "should": "^13.2.3",
     "supertest": "^3.3.0",
     "tap-nyc": "^1.0.3"

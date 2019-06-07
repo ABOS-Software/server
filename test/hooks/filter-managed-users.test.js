@@ -1,7 +1,9 @@
-
+const rewire = require('rewire');
 const assert = require('assert');
+const should = require('should');
+
 const feathers = require('@feathersjs/feathers');
-const filterManagedUsers = require('../../src/hooks/filter-managed-users');
+const filterManagedUsers = rewire('../../src/hooks/filter-managed-users');
 
 describe('\'filterManagedUsers\' hook', () => {
   let app;
@@ -18,9 +20,15 @@ describe('\'filterManagedUsers\' hook', () => {
     app.service('dummy').hooks({});
   });
 
-  it('runs the hook', async () => {
-    const result = await app.service('dummy').get('test');
+  it('Get Year', () => {
+    let fakeContext = {params: {
+      user: {
+        enabledYear: '2014'
+      }
+      }};
 
-    assert.deepEqual(result, {id: 'test'});
-  });
+    let returnYear = filterManagedUsers.__get__('getYear')(fakeContext);
+
+    returnYear.should.equal('2014');
+  })
 });
