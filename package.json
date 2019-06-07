@@ -30,6 +30,7 @@
     "mocha": "mocha $NODE_DEBUG_OPTION test/ --recursive --exit"
   },
   "dependencies": {
+    "ajv": "^6.10.0",
     "@feathersjs/authentication": "^2.1.13",
     "@feathersjs/authentication-jwt": "^2.0.7",
     "@feathersjs/authentication-local": "^1.2.7",
@@ -50,7 +51,6 @@
     "jsreport-core": "^2.3.2",
     "jsreport-handlebars": "^2.0.0",
     "jsreport-jsrender": "^2.0.0",
-    "jsreport-phantom-pdf": "^2.1.4",
     "mysql2": "^1.6.4",
     "opencage-api-client": "^0.4.0",
     "pg": "^7.7.1",
