@@ -86,7 +86,7 @@ describe('\'filterManagedUsers\' hook', () => {
 
     returnYear.should.equal('2014');
   });
-  it('test Validation', async (done) => {
+  it('test Validation', (done) => {
     this.timeout(10000);
 
     let fakeContext = {
