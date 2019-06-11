@@ -5,7 +5,6 @@
 const {Forbidden, BadRequest} = require('@feathersjs/errors');
 const getYear = (context) => {
   let year = 1;
-
   if (context.params.user.enabledYear) {
     year = context.params.user.enabledYear;
   } else if (context.params.query.year_id) {

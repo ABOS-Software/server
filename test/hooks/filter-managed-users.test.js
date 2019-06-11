@@ -64,8 +64,8 @@ describe('\'filterManagedUsers\' hook', () => {
         params: { query: {
             year_id: '2014'
           }
-        }, user: {id: 0}
-      };
+        , user: {id: 0}
+      }};
 
     let returnYear = filterManagedUsers.__get__('getYear')(fakeContext);
 
@@ -76,10 +76,11 @@ describe('\'filterManagedUsers\' hook', () => {
       params: {
         query: {
             year: '2014'
-          }
-        },
+          },
         user: {id: 0}
+      }
     };
+   
 
     let returnYear = filterManagedUsers.__get__('getYear')(fakeContext);
 
