@@ -107,7 +107,7 @@ describe('\'filterManagedUsers\' hook', () => {
         path: 'dummy'
       };
 
-    filterManagedUsers(fakeContext).then((filter) => {
+    filterManagedUsers()(fakeContext).then((filter) => {
       console.log(filter);
       done();
     });
