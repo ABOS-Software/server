@@ -2,6 +2,7 @@ const request = require('supertest');
 
 const createOrderC1 = (year) => {
   return {
+    'id': year,
     'order': {
       'orderedProducts': [
         {
@@ -40,6 +41,7 @@ const createOrderC1 = (year) => {
 };
 const createOrderC2 = (year) => {
   return {
+    'id': (4 + year - 1),
     'order': {
       'orderedProducts': [
         {
@@ -52,7 +54,7 @@ const createOrderC2 = (year) => {
         },
         {
           'products': {
-            'id': (2 + year - 1)
+            'id': (4 + year - 1)
           },
           'quantity': 4,
           'extendedCost': 40,

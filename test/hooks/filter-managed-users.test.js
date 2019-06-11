@@ -60,24 +60,26 @@ describe('\'filterManagedUsers\' hook', () => {
     returnYear.should.equal('2014');
   });
   it('Get Year for Query ID', () => {
-    let fakeContext = {params: {
+    let fakeContext = {
         params: { query: {
             year_id: '2014'
           }
         }, user: {}
-      }};
+      };
 
     let returnYear = filterManagedUsers.__get__('getYear')(fakeContext);
 
     returnYear.should.equal('2014');
   });
   it('Get Year for Query', () => {
-    let fakeContext = {params: {
-      query: {
-          year: '2014'
-        }
-      },
-      user: {}};
+    let fakeContext = {
+      params: {
+        query: {
+            year: '2014'
+          }
+        },
+        user: {}
+    };
 
     let returnYear = filterManagedUsers.__get__('getYear')(fakeContext);
 
