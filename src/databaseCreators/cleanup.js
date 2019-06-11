@@ -19,13 +19,23 @@ const cleanupYears = (app) => {
   return app.service('Years').remove(null);
 
 };
+const cleanupUsers = (app) => {
+  return app.service('user').remove(null, {query: {id: {$in: [2,3,4]}}});
+
+};
+const cleanupUMs = (app) => {
+  return app.service('userManager').remove(null, {query: {user_id: {$in: [2,3,4]}}});
+
+};
 
 const cleanup = (app) => {
   return cleanupOrderedProducts(app)
     .then(cleanupOrders(app))
     .then(cleanupProducts(app))
     .then(cleanupCustomers(app))
-    .then(cleanupYears(app));
+    .then(cleanupUMs(app))
+    .then(cleanupYears(app))
+    .then(cleanupUsers(app));
 
 };
 

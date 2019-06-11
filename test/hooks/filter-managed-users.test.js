@@ -8,6 +8,7 @@ const app = require('../../src/app');
 
 const feathers = require('@feathersjs/feathers');
 const filterManagedUsers = rewire('../../src/hooks/filter-managed-users');
+const {cleanup} = require('../../src/databaseCreators/cleanup');
 
 describe('\'filterManagedUsers\' hook', () => {
   let dummyApp;
@@ -62,7 +63,7 @@ describe('\'filterManagedUsers\' hook', () => {
     let fakeContext = {params: {
         params: {
           year_id: '2014'
-        }
+        }, user: {}
       }};
 
     let returnYear = filterManagedUsers.__get__('getYear')(fakeContext);
@@ -72,18 +73,7 @@ describe('\'filterManagedUsers\' hook', () => {
   it('Get Year for Query', () => {
     let fakeContext = {params: {
         year: '2014'
-      }};
-
-    let returnYear = filterManagedUsers.__get__('getYear')(fakeContext);
-
-    returnYear.should.equal('2014');
-  });
-  it('Get Year', () => {
-    let fakeContext = {params: {
-        user: {
-          enabledYear: '2014'
-        }
-      }};
+      }, user: {}};
 
     let returnYear = filterManagedUsers.__get__('getYear')(fakeContext);
 
@@ -109,5 +99,13 @@ describe('\'filterManagedUsers\' hook', () => {
       };
 
     let filter = filterManagedUsers(fakeContext);
+    console.log(filter);
+  });
+  step('Cleanup', function(done)  {
+    this.timeout(10000);
+
+    cleanup(app).then((res, err) => {
+      done(err);
+    });
   });
 });
