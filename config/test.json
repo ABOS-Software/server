@@ -22,7 +22,7 @@
     "password": "testPassword",
     "host": "mysql",
     "port": 3306,
-    "logging": true,
+    "logging": false,
     "dialectOptions": {
       "decimalNumbers": true
     }
