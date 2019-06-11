@@ -86,7 +86,7 @@ describe('\'filterManagedUsers\' hook', () => {
 
     returnYear.should.equal('2014');
   });
-  it('test Validation', () => {
+  it('test Validation', async (done) => {
     let fakeContext = {
       method: 'update',
       data: {
@@ -105,8 +105,10 @@ describe('\'filterManagedUsers\' hook', () => {
         path: 'dummy'
       };
 
-    let filter = filterManagedUsers(fakeContext);
-    console.log(filter);
+    filterManagedUsers(fakeContext).then((filter) => {
+      console.log(filter);
+      done();
+    });
   });
   step('Cleanup', function(done)  {
     this.timeout(10000);
