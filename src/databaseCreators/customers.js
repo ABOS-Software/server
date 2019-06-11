@@ -6,7 +6,7 @@ const createOrderC1 = (year) => {
       'orderedProducts': [
         {
           'products': {
-            'id': (1 + year - 1)
+            'id': (1 + year - 1) // 20 21 22
           },
           'quantity': 1,
           'extendedCost': 40,
@@ -14,7 +14,7 @@ const createOrderC1 = (year) => {
         },
         {
           'products': {
-            'id': (2 + year - 1)
+            'id': (4 + year - 1) // 23 24 25
           },
           'quantity': 2,
           'extendedCost': 20,
@@ -78,14 +78,14 @@ const createOrderC2 = (year) => {
 };
 const createCustomers = (app) => {
   return app.service('customers').create([
-    createOrderC1(1),
-    createOrderC2(1),
+    createOrderC1(20),
+    createOrderC2(20),
 
-    createOrderC1(2),
-    createOrderC2(2),
+    createOrderC1(21),
+    createOrderC2(21),
 
-    createOrderC1(3),
-    createOrderC2(3),
+    createOrderC1(22),
+    createOrderC2(22),
 
   ]);
 };
