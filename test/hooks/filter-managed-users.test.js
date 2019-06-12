@@ -80,7 +80,7 @@ describe('\'filterManagedUsers\' hook', () => {
         user: {id: 0}
       }
     };
-   
+
 
     let returnYear = filterManagedUsers.__get__('getYear')(fakeContext);
 
@@ -90,27 +90,34 @@ describe('\'filterManagedUsers\' hook', () => {
     this.timeout(10000);
 
     let fakeContext = {
+      app: app,
       method: 'update',
       data: {
-        user_id: 2,
+        user_id: 3,
       },
 
         params: {
+        provider: 'rest',
+          query: {
+          },
           payload: {
             userId: 2,
-          },
+        },
           user: {
             id: 2,
-            enabledYear: '2014'
+            enabledYear: 20
           },
         },
         path: 'dummy'
       };
 
     filterManagedUsers()(fakeContext).then((filter) => {
-      console.log(filter);
+      filter.should.deepEqual(fakeContext);
       done();
-    });
+    })
+      .catch((err) => {
+        done(err);
+      });
   });
   step('Cleanup', function(done)  {
     this.timeout(10000);

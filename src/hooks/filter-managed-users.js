@@ -86,18 +86,22 @@ module.exports = function (options = {}) {
     if (!context.params.payload.userId) {
       throw new Forbidden('NOT AUTHENTICATED!');
     }
-    let uM = await getUMs(context, field);
+    try {
+      let uM = await getUMs(context, field);
 
-    delete context.params.query[field];
-    delete context.params.query.includeSub;
+      delete context.params.query[field];
+      delete context.params.query.includeSub;
 
-    if (uM) {
-      try {
-        context = await validate(context, uM, options);
-      } catch (e) {
-        throw e;
+      if (uM) {
+        try {
+          context = await validate(context, uM, options);
+        } catch (e1) {
+          throw e1;
+        }
+
       }
-
+    } catch (e) {
+      throw (e);
     }
     return context;
 
