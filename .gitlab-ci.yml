@@ -80,7 +80,7 @@ test:
     NODE_ENV: test
     CC_TEST_REPORTER_ID: $CC_TEST_REPORTER_ID
   stage: test
-  image: buildkite/puppeteer:latest
+  image: rotatingfans/jsreport-ci:latest
   after_script:
   script:
     - mkdir test/outputFiles
