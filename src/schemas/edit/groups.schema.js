@@ -8,8 +8,6 @@ const schema = {
     "groupName",
     "id",
     "year_id",
-    "year",
-    "user_years"
   ],
   "properties": {
     "groupName": {
