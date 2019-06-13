@@ -46,7 +46,7 @@ module.exports = {
     find: [sequelizeParams()] ,
     get: [sequelizeParams()],
     create: [validateSchema(notesCreate, Ajv), makeArray() ],
-    update: [validateSchema(notesEdit, Ajv), makeArray(), update()],
+    update: [validateSchema(notesEdit, Ajv), makeArray(), update(),DeArray()],
     patch: [],
     remove: []
   },

@@ -16,8 +16,6 @@ const schema ={
     "longitude",
     "city",
     "use_coords",
-    "created_at",
-    "updated_at",
     "year_id",
     "user_id",
     "userName",

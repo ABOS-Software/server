@@ -39,7 +39,7 @@ module.exports = {
     find: [sequelizeParams()],
     get: [sequelizeParams()],
     create: [validateSchema(groupsCreate, Ajv), makeArray(), addUpdateData(), checkPermissions(['ROLE_ADMIN'])],
-    update: [validateSchema(groupsEdit, Ajv), makeArray(), addUpdateData(), checkPermissions(['ROLE_ADMIN'])],
+    update: [validateSchema(groupsEdit, Ajv), makeArray(), addUpdateData(), checkPermissions(['ROLE_ADMIN']),DeArray()],
     patch: [addUpdateData(), checkPermissions(['ROLE_ADMIN'])],
     remove: [checkPermissions(['ROLE_ADMIN'])]
   },

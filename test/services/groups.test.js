@@ -17,13 +17,7 @@ describe('\'groups\' service', () => {
       done(err);
     });
   });
-  step('Creating userMangagers', function(done)  {
-    this.timeout(10000);
 
-    createUsersManagement(app).then((res, err) => {
-      done(err);
-    });
-  });
   step('Get JWT', function(done) {
     request(app)
       .post('/authentication')
@@ -46,6 +40,13 @@ describe('\'groups\' service', () => {
     this.timeout(10000);
 
     createYears(app).then((res, err) => {
+      done(err);
+    });
+  });
+  step('Creating userMangagers', function(done)  {
+    this.timeout(10000);
+
+    createUsersManagement(app).then((res, err) => {
       done(err);
     });
   });

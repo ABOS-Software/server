@@ -367,7 +367,7 @@ module.exports = {
     find: [sequelizeParams(), fuzzySearch()],
     get: [sequelizeParams()],
     create: [validateSchema(customersCreate, Ajv),makeArray(), prepOrder()],
-    update: [validateSchema(customersEdit, Ajv), makeArray(), prepOrder()],
+    update: [validateSchema(customersEdit, Ajv), makeArray(), prepOrder(),DeArray()],
     patch: [],
     remove: []
   },

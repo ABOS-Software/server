@@ -55,7 +55,7 @@ module.exports = {
 
 
       return context;
-    }],
+    }, DeArray()],
     patch: [(context) => {
       // Get the Sequelize instance. In the generated application via:
       //  const sequelize = context.app.get('sequelizeClient');

@@ -68,7 +68,7 @@ module.exports = {
     find: [sequelizeParams()] ,
     get: [sequelizeParams()],
     create: [validateSchema(paymentsCreate, Ajv), makeArray(),],
-    update: [validateSchema(paymentsEdit, Ajv), makeArray(), update()],
+    update: [validateSchema(paymentsEdit, Ajv), makeArray(), update(),DeArray()],
     patch: [],
     remove: []
   },
