@@ -6,8 +6,8 @@ const should = require('should');
 
 const rp = require('request-promise');
 const url = require('url');
-const app = require('../src/app');
-const errorHandler = require('../src/hooks/errorHandler');
+const app = require('../../src/app');
+const errorHandler = require('../../src/hooks/errorHandler');
 const request = require('supertest');
 
 const port = app.get('port') || 3030;

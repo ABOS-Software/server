@@ -22,6 +22,7 @@
     "yarn": ">= 0.18.0"
   },
   "scripts": {
+    "coverageActive": "node src/setupTestDataBase.js && nyc mocha $NODE_DEBUG_OPTION test/Active/ --recursive --exit --require mocha-steps ",
     "testActive": "node src/setupTestDataBase.js && mocha $NODE_DEBUG_OPTION test/Active/ --recursive --exit --require mocha-steps ",
     "test": "node src/setupTestDataBase.js && yarn run mocha --require mocha-steps",
     "coverage": "node src/setupTestDataBase.js && nyc mocha $NODE_DEBUG_OPTION test/ --recursive --exit --require mocha-steps",

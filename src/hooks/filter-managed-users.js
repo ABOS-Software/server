@@ -73,7 +73,8 @@ const isAdmin = async (context) => {
   const sequelize = context.app.get('sequelizeClient');
   const role = sequelize.models['role'];
   let userRole = await context.app.service('userRole').find({query: {user_id: context.params.payload.userId}, sequelize: {include: [{model: role, attributes: ['authority']}]}});
-  return userRole.role.authority === 'ROLE_ADMIN';
+
+  return userRole && userRole.role && userRole.role.authority === 'ROLE_ADMIN';
 };
 
 
@@ -94,7 +95,7 @@ module.exports = function (options = {}) {
     if (!context.params.payload.userId) {
       throw new Forbidden('NOT AUTHENTICATED!');
     }
-    if (isAdmin(context)) {
+    if (await isAdmin(context)) {
       return Promise.resolve(context);
     }
     try {
