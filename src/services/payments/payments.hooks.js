@@ -15,7 +15,7 @@ const sequelizeParams = () => {
     const payment_methods = seqClient.models['payment_methods'];
     const user = seqClient.models['user'];
 
-    if (context.params.query.year) {
+    if (context.params.query && context.params.query.year) {
       context.params.query.year_id = context.params.query.year;
       delete context.params.query.year;
 
@@ -46,17 +46,20 @@ const update = () => {
 
 const updateAmountPaid = () => {
   return async context => {
-    for (let resultKey in context.result) {
+
+    for (let resultKey of context.result) {
       const seqClient = context.app.get('sequelizeClient');
 
       const orders = seqClient.models['orders'];
       const paymentsM = seqClient.models['payments'];
-      let order = await orders.findOne({where: {customer_id: context.result[resultKey].customer_id}});
-      let totalPaid = await paymentsM.sum('amount', {where: {customer_id: context.result[resultKey].customer_id}});
-
-      order.amount_paid = totalPaid;
-      await order.save();
-
+      let order = await orders.findOne({where: {customer_id: resultKey.customer_id}});
+      let totalPaid = await paymentsM.sum('amount', {where: {customer_id: resultKey.customer_id}});
+      if(order) {
+        order.amount_paid = totalPaid;
+        await order.save();
+      } else {
+        console.log('test');
+      }
     }
 
     return context;

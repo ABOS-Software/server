@@ -14,8 +14,6 @@ const schema ={
     "customer_id",
     "order_id",
     "year_id",
-    "user",
-    "year",
     "payment_method"
   ],
   "properties": {
@@ -26,7 +24,7 @@ const schema ={
     },
     "amount": {
       "$id": "#/properties/amount",
-      "type": "integer",
+      "type": "number",
       "default": 0
     },
     "payment_date": {
@@ -103,7 +101,6 @@ const schema ={
       "type": "object",
       "required": [
         "id",
-        "name"
       ],
       "properties": {
         "id": {
