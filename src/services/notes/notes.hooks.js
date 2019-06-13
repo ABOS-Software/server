@@ -13,7 +13,7 @@ const sequelizeParams = () => {
 
     const year = seqClient.models['year'];
     const note_codes = seqClient.models['note_codes'];
-    if (context.params.query.year) {
+    if (context.params.query && context.params.query.year) {
       context.params.query.year_id = context.params.query.year;
       delete context.params.query.year;
 

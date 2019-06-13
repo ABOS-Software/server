@@ -40,6 +40,9 @@ before(async function () {
           authority: 'ROLE_ADMIN',
         }, {authority: 'ROLE_USER'}]);
         await app.service('RoleHierarchyEntry').create({entry: 'ROLE_ADMIN > ROLE_USER'});
+        await app.service('note_codes').create({name: 'note', description: 'note'});
+        await app.service('payment_methods').create({name: 'cash'});
+
         await app.service('user').create({
           'username': 'test',
           'password': 'test',

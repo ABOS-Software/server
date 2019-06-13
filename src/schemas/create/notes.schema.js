@@ -11,7 +11,6 @@ const schema = {
     "customer_id",
     "user_id",
     "user_name",
-    "order_id"
   ],
   "properties": {
     "note": {

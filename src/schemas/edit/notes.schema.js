@@ -7,12 +7,10 @@ const schema = {
   "required": [
     "id",
     "note",
-    "updated_at",
     "user_id",
     "user_name",
     "customer_id",
     "year_id",
-    "year",
     "note_code"
   ],
   "properties": {
@@ -23,11 +21,6 @@ const schema = {
     },
     "note": {
       "$id": "#/properties/note",
-      "type": "string",
-      "default": ""
-    },
-    "updated_at": {
-      "$id": "#/properties/updated_at",
       "type": "string",
       "default": ""
     },
@@ -51,32 +44,12 @@ const schema = {
       "type": "integer",
       "default": 0
     },
-    "year": {
-      "$id": "#/properties/year",
-      "type": "object",
-      "required": [
-        "id",
-        "year"
-      ],
-      "properties": {
-        "id": {
-          "$id": "#/properties/year/properties/id",
-          "type": "integer",
-          "default": 0
-        },
-        "year": {
-          "$id": "#/properties/year/properties/year",
-          "type": "string",
-          "default": ""
-        }
-      }
-    },
+
     "note_code": {
       "$id": "#/properties/note_code",
       "type": "object",
       "required": [
         "id",
-        "name"
       ],
       "properties": {
         "id": {

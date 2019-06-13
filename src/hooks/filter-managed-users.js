@@ -94,7 +94,19 @@ module.exports = function (options = {}) {
 
       if (uM) {
         try {
-          context = await validate(context, uM, options);
+          if (context.data instanceof Array) {
+            let fakeContext = {...context};
+            for (let dataKey in context.data) {
+              fakeContext.data = context.data[dataKey];
+              fakeContext = await validate(fakeContext, uM, options);
+              context.data[dataKey] = fakeContext.data;
+
+            }
+          } else {
+            context = await validate(context, uM, options);
+
+          }
+
         } catch (e1) {
           throw e1;
         }
