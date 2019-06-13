@@ -69,6 +69,14 @@ const validate = async (context, userMangers, options) => {
     throw e;
   }
 };
+const isAdmin = async (context) => {
+  const sequelize = context.app.get('sequelizeClient');
+  const role = sequelize.models['role'];
+  let userRole = await context.app.service('userRole').find({query: {user_id: context.params.payload.userId}, sequelize: {include: [{model: role, attributes: ['authority']}]}});
+  return userRole.role.authority === 'ROLE_ADMIN';
+};
+
+
 module.exports = function (options = {}) {
   options = Object.assign({
     field: 'user_id',
@@ -85,6 +93,9 @@ module.exports = function (options = {}) {
     }
     if (!context.params.payload.userId) {
       throw new Forbidden('NOT AUTHENTICATED!');
+    }
+    if (isAdmin(context)) {
+      return Promise.resolve(context);
     }
     try {
       let uM = await getUMs(context, field);
