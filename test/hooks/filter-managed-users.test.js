@@ -105,7 +105,7 @@ describe('\'filterManagedUsers\' hook', () => {
         done(err);
       });
   });
-  step('Cleanup', function(done)  {
+  after('Cleanup', function(done)  {
     this.timeout(10000);
 
     cleanup(app).then((res, err) => {

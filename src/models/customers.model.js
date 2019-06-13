@@ -79,8 +79,8 @@ module.exports = function (app) {
     tableName: 'customers', underscored: true,
   });
   schema.associate = models => {
-    schema.belongsTo(models.year);
-    schema.belongsTo(models.user);
+    schema.belongsTo(models.year, {onDelete: 'cascade'});
+    schema.belongsTo(models.user, {onDelete: 'cascade'});
     schema.hasOne(models.orders, {onDelete: 'cascade'});
   };
   return schema;

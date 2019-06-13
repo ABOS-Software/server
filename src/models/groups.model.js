@@ -22,8 +22,8 @@ module.exports = function (app) {
     tableName: 'groups', underscored: true,
   });
   schema.associate = models => {
-    schema.belongsTo(models.year);
-    schema.hasMany(models.user_year);
+    schema.belongsTo(models.year, {onDelete: 'cascade'});
+    schema.hasMany(models.user_year, {onDelete: 'cascade'});
   };
   return schema;
 };

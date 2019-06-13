@@ -200,7 +200,7 @@ describe('\'checkPermissions\' hook', () => {
 
     return checkPermissions(['ROLE_TEST'])(fakeContext).should.be.rejectedWith(Forbidden);
   });
-  step('Cleanup', function(done)  {
+  after('Cleanup', function(done)  {
     this.timeout(10000);
 
     cleanup(app).then((res, err) => {

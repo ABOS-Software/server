@@ -71,6 +71,7 @@
     "request-promise": "^4.2.2",
     "rewire": "^4.0.1",
     "should": "^13.2.3",
+    "sleep-promise": "^8.0.1",
     "supertest": "^3.3.0",
     "tap-nyc": "^1.0.3"
   }

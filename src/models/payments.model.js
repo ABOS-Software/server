@@ -38,12 +38,12 @@ module.exports = function (app) {
     tableName: 'payments', underscored: true,
   });
   schema.associate = models => {
-    schema.belongsTo(models.year);
-    schema.belongsTo(models.user);
+    schema.belongsTo(models.year, {onDelete: 'cascade'});
+    schema.belongsTo(models.user, {onDelete: 'cascade'});
 
     schema.belongsTo(models.customers, {onDelete: 'cascade'});
-    schema.belongsTo(models.orders);
-    schema.belongsTo(models.payment_methods);
+    schema.belongsTo(models.orders, {onDelete: 'cascade'});
+    schema.belongsTo(models.payment_methods, {onDelete: 'cascade'});
 
   };
   return schema;

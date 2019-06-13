@@ -36,7 +36,7 @@ const createOrderC1 = (year) => {
     'state': 'PA',
     'zipCode': '19109',
     'donation': '12.45',
-    'user': 1
+    'user': 2
   };
 };
 const createOrderC2 = (year) => {
@@ -75,7 +75,7 @@ const createOrderC2 = (year) => {
     'state': 'PA',
     'zipCode': '19109',
     'donation': '0.00',
-    'user': 1
+    'user': 2
   };
 };
 const createCustomers = (app) => {

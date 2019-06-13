@@ -5,12 +5,12 @@
 const {Forbidden, BadRequest} = require('@feathersjs/errors');
 const getYear = (context) => {
   let year = 1;
-  if (context.params.user.enabledYear) {
-    year = context.params.user.enabledYear;
-  } else if (context.params.query.year_id) {
+  if (context.params.query && context.params.query.year_id) {
     year = context.params.query.year_id;
-  } else if (context.params.query.year) {
+  } else if (context.params.query && context.params.query.year) {
     year = context.params.query.year;
+  } else if (context.params.user && context.params.user.enabledYear) {
+    year = context.params.user.enabledYear;
   }
   return year;
 };
