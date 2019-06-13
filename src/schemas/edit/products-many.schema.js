@@ -20,7 +20,6 @@ const schema = {
         "required": [
           "humanProductId",
           "id",
-          "year",
           "productName",
           "unitSize",
           "unitCost",
@@ -64,7 +63,7 @@ const schema = {
           },
           "unitCost": {
             "$id": "#/properties/newProducts/items/properties/unitCost",
-            "type": "number",
+            "type": "string",
             "default": 0.0
           },
           "category": {
@@ -89,7 +88,6 @@ const schema = {
         "required": [
           "humanProductId",
           "id",
-          "year",
           "productName",
           "unitSize",
           "unitCost",
@@ -133,7 +131,7 @@ const schema = {
           },
           "unitCost": {
             "$id": "#/properties/updatedProducts/items/properties/unitCost",
-            "type": "number",
+            "type": "string",
             "default": 0.0
           },
           "category": {
@@ -158,7 +156,6 @@ const schema = {
         "required": [
           "humanProductId",
           "id",
-          "year",
           "productName",
           "unitSize",
           "unitCost",
@@ -202,7 +199,7 @@ const schema = {
           },
           "unitCost": {
             "$id": "#/properties/deletedProducts/items/properties/unitCost",
-            "type": "number",
+            "type": "string",
             "default": 0.0
           },
           "category": {

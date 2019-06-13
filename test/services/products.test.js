@@ -80,7 +80,7 @@ describe('\'products\' service', () => {
         }
       });
   });
-  it('Returns List of Orders', function (done) {
+  it('Returns List of Products', function (done) {
     this.timeout(10000);
     request(app)
       .get('/products')
@@ -98,6 +98,7 @@ describe('\'products\' service', () => {
         done(err);
       });
   });
+
   after('Cleanup', function(done)  {
     this.timeout(10000);
 
