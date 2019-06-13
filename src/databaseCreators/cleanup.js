@@ -20,11 +20,11 @@ const cleanupYears = (app) => {
 
 };
 const cleanupUsers = (app) => {
-  return app.service('user').remove(null, {query: {id: {$in: [2,3,4]}}});
+  return app.service('user').remove(null, {query: {id: {$in: [2,3,4, 5]}}});
 
 };
 const cleanupUMs = (app) => {
-  return app.service('userManager').remove(null, {query: {user_id: {$in: [2,3,4]}}});
+  return app.service('userManager').remove(null, {query: {user_id: {$in: [2,3,4, 5]}}});
 
 };
 

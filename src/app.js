@@ -53,7 +53,7 @@ app.use('/', express.static(app.get('public')));
 
 // Set up Plugins and providers
 app.configure(express.rest());
-app.configure(socketio());
+//app.configure(socketio());
 /*if (app.get('env') === 'test' || app.get('env') === 'test_local') {
   app.configure(setupTestData);
 }*/
@@ -67,7 +67,7 @@ app.configure(authentication);
 app.configure(services);
 
 // Set up event channels (see channels.js)
-app.configure(channels);
+//app.configure(channels);
 
 // Configure a middleware for 404s and the error handler
 app.use(Sentry.Handlers.errorHandler());

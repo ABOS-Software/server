@@ -11,21 +11,7 @@ const filterManagedUsers = rewire('../../src/hooks/filter-managed-users');
 const {cleanup} = require('../../src/databaseCreators/cleanup');
 
 describe('\'filterManagedUsers\' hook', () => {
-  let dummyApp;
 
-  beforeEach(() => {
-    dummyApp = feathers();
-
-    dummyApp.use('/dummy', {
-      async get(id) {
-        return {id};
-      }
-    });
-
-    dummyApp.service('dummy').hooks({before:{
-      all: {filterManagedUsers}
-      }});
-  });
   step('Creating Years', function(done)  {
     this.timeout(10000);
 

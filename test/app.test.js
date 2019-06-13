@@ -39,6 +39,7 @@ before(async function () {
         await app.service('role').create([{
           authority: 'ROLE_ADMIN',
         }, {authority: 'ROLE_USER'}]);
+        await app.service('RoleHierarchyEntry').create({entry: 'ROLE_ADMIN > ROLE_USER'});
         await app.service('user').create({
           'username': 'test',
           'password': 'test',
