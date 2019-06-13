@@ -10,8 +10,6 @@ module.exports = {
   'longitude': -75.163949,
   'city': 'Philadelphia',
   'use_coords': true,
-  'created_at': '2019-06-13T17:59:02.000Z',
-  'updated_at': '2019-06-13T17:59:02.000Z',
   'year_id': 20,
   'user_id': 2,
   'userName': 'test2',
@@ -23,14 +21,14 @@ module.exports = {
   'user': {'id': 2, 'fullName': 'test2 Name', 'username': 'test2'},
   'order': {
     'id': 2,
-    'cost': 120,
-    'quantity': 6,
+    'cost': 160,
+    'quantity': 7,
     'amountPaid': 0,
     'delivered': true,
     'userName': 'test2',
     'orderedProducts': [{
       'id': 3,
-      'quantity': 2,
+      'quantity': 3,
       'userName': 'test2',
       'products': {
         'id': 20,

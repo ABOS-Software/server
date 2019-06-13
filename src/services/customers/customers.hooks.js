@@ -100,6 +100,7 @@ const updateOrderedProducts = async (order, customer, custData, sequelize) => {
     let opM = await getOrderedProduct(op, sequelize);
     let product = await products.findByPk(op.products_id);
     opM.user_name = custData.user_name;
+    opM.extended_cost = opM.quantity * product.unit_cost;
     extendedCost += opM.extended_cost;
     quantity += opM.quantity;
     opM.setUser(user, {save: false});
@@ -176,8 +177,14 @@ const saveOrder = () => {
 
       const seqClient = context.app.get('sequelizeClient');
       const customers = seqClient.models['customers'];
+      let customer;
+      if (context.result instanceof Array) {
+        customer = await customers.findByPk(context.result[custDataKey].id);
 
-      let customer = await customers.findByPk(context.result[custDataKey].id);
+      } else {
+        customer = await customers.findByPk(context.result.id);
+
+      }
       try {
         let order = await getOrder(dataArray[custDataKey], seqClient);
         order.customer_id = customer.id;
@@ -199,6 +206,8 @@ const saveOrder = () => {
         return context;
       }
     }
+    context.result = dataArray;
+    return context;
 
   };
 };

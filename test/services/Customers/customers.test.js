@@ -95,10 +95,12 @@ describe('\'customers\' service', () => {
       .catch(err => done(err));
   });
   step('Updates Customers', function(done) {
+    this.timeout(100000);
     request(app)
       .put('/customers/' + 23)
-      .query({year: 20})
-      .send(update_request)
+      .query({
+        'year_id': 20
+      })      .send(update_request)
       .set('Authorization', app.get('USER2_JWT'))
       .expect(200)
       .then(response => {
@@ -110,20 +112,22 @@ describe('\'customers\' service', () => {
   step('Deletes Customers', function(done) {
     request(app)
       .delete('/customers/20')
-      .query({year: 20})
-
+      .query({
+        'year_id': 20
+      })
       .set('Authorization', app.get('USER2_JWT'))
       .expect(200, done);
   });
   step('Finds Customers', function(done) {
     request(app)
       .get('/customers/')
-      .query({year: 20})
-
+      .query({
+        'year': 20
+      })
       .set('Authorization', app.get('USER2_JWT'))
       .expect(200)
       .then(response => {
-        response.body.should.containDeep(
+        response.body.data.should.containDeep(
           list_after
         );
         done();
@@ -132,9 +136,10 @@ describe('\'customers\' service', () => {
   });
   step('Gets Customer', function(done) {
     request(app)
-      .get('/customers/22')
-      .query({year: 20})
-
+      .get('/customers/23')
+      .query({
+        'year': 20
+      })
       .set('Authorization', app.get('USER2_JWT'))
       .expect(200)
       .then(response => {

@@ -12,6 +12,9 @@ module.exports = function () {
         if ((context.data instanceof Array) && context.data.length === 1) {
           context.data = context.data[0];
         }
+        if ((context.result instanceof Array) && context.result.length === 1) {
+          context.result = context.result[0];
+        }
       } else {
         if ((context.result instanceof Array) && context.result.length === 1) {
           context.result = context.result[0];
