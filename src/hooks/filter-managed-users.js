@@ -73,8 +73,9 @@ const isAdmin = async (context) => {
   const sequelize = context.app.get('sequelizeClient');
   const role = sequelize.models['role'];
   let userRole = await context.app.service('userRole').find({query: {user_id: context.params.payload.userId}, sequelize: {include: [{model: role, attributes: ['authority']}]}});
-
-  return userRole && userRole.role && userRole.role.authority === 'ROLE_ADMIN';
+  if (userRole && userRole.data.length === 1) {
+    return userRole.data[0].role.authority === 'ROLE_ADMIN';
+  } else {return false;}
 };
 
 
