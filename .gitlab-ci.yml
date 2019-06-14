@@ -653,6 +653,7 @@ production:
     echo $APPLICATION_CONFIG > config/production.json
     echo "OCD_API_KEY="$OCD_API_KEY > .env
 
+
   }
 
   function create_secret() {
