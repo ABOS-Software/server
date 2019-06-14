@@ -1,6 +1,6 @@
 module.exports = function () {
 
-  return async context => {
+  return context => {
     if (context.type === 'before') {
       if ((context.data instanceof Array) && context.data.length === 1) {
         context.data = context.data[0];
