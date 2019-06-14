@@ -78,13 +78,42 @@ const isAdmin = async (context) => {
   } else {return false;}
 };
 
+const filter = async (context, options) => {
+  const {field} = options;
+
+  let uM = await getUMs(context, field);
+
+  delete context.params.query[field];
+  delete context.params.query.includeSub;
+
+  if (uM) {
+    try {
+      if (context.data instanceof Array) {
+        let fakeContext = {...context};
+        for (let dataKey in context.data) {
+          fakeContext.data = context.data[dataKey];
+          fakeContext = await validate(fakeContext, uM, options);
+          context.data[dataKey] = fakeContext.data;
+
+        }
+      } else {
+        context = await validate(context, uM, options);
+
+      }
+
+    } catch (e1) {
+      throw e1;
+    }
+
+  }
+  return context;
+}
 
 module.exports = function (options = {}) {
   options = Object.assign({
     field: 'user_id',
     createField: 'user'
   }, options);
-  const {field} = options;
 
   return async context => {
     if (!context.params.provider) {
@@ -100,31 +129,7 @@ module.exports = function (options = {}) {
       return Promise.resolve(context);
     }
     try {
-      let uM = await getUMs(context, field);
-
-      delete context.params.query[field];
-      delete context.params.query.includeSub;
-
-      if (uM) {
-        try {
-          if (context.data instanceof Array) {
-            let fakeContext = {...context};
-            for (let dataKey in context.data) {
-              fakeContext.data = context.data[dataKey];
-              fakeContext = await validate(fakeContext, uM, options);
-              context.data[dataKey] = fakeContext.data;
-
-            }
-          } else {
-            context = await validate(context, uM, options);
-
-          }
-
-        } catch (e1) {
-          throw e1;
-        }
-
-      }
+      context = filter(context, options);
     } catch (e) {
       throw (e);
     }

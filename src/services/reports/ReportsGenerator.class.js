@@ -161,8 +161,7 @@ class ReportsGenerator {
     return jsonParams;
   }
 
-  async generate(jsonParams) {
-
+  async getOptions(jsonParams) {
     let customers = this.getCustomersArray(jsonParams);
     let cates = this.getCategoriesArray(jsonParams);
     let user = jsonParams.User;
@@ -188,8 +187,18 @@ class ReportsGenerator {
       splitting: Splitting,
       includeHeader: includeHeader,
     };
+    return {fileName: fileName, options: options};
+  }
 
-    let data = await this.generateJSON(options);
+  async generate(jsonParams) {
+
+    let {fileName, options} = await this.getOptions(jsonParams);
+    let data;
+    try {
+      data = await this.generateJSON(options);
+    } catch (e) {
+      console.log(e);
+    }
 
     return await {fileName: fileName, data: data};
 

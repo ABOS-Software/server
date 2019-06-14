@@ -153,7 +153,7 @@ describe('\'customers\' service', () => {
 
   after('Cleanup', function(done)  {
     this.timeout(10000);
-
+    this.retries(4);
     cleanup(app).then((res, err) => {
       done(err);
     });

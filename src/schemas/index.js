@@ -12,7 +12,6 @@ const groupsEdit = require('./edit/groups.schema');
 const notesEdit = require('./edit/notes.schema');
 const paymentsEdit = require('./edit/payments.schema');
 const productsMany = require('./edit/products-many.schema');
-const userEdit = require('./edit/user.schema');
 const userHierarchy = require('./edit/user-hierarchy.schema');
 
 module.exports = {
@@ -30,6 +29,6 @@ module.exports = {
   notesEdit: notesEdit,
   paymentsEdit: paymentsEdit,
   productsMany: productsMany,
-  userEdit: userEdit,
+  userEdit: userCreate,
   userHierarchy: userHierarchy,
 };

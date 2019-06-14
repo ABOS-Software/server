@@ -141,12 +141,8 @@ const checkError = async (customer, model, context) => {
 const safeDeleteCustomerContext = () => {
   return async context => {
     if (context.method === 'create') {
-      let custData;
-      if (context.method === 'update') {
-        custData = context.data;
-      } else {
-        custData = context.result;
-      }
+      let custData = context.result;
+
 
       const seqClient = context.app.get('sequelizeClient');
       const customers = seqClient.models['customers'];
@@ -163,45 +159,46 @@ const safeDeleteCustomer = async (customer, context) => {
     await customer.destroy();
   }
 };
+const getCustomer = async (context, custDataKey) => {
+  let customer;
+  const seqClient = context.app.get('sequelizeClient');
+  const customers = seqClient.models['customers'];
+  if (context.result instanceof Array) {
+    customer = await customers.findByPk(context.result[custDataKey].id);
+
+  } else {
+    customer = await customers.findByPk(context.result.id);
+
+  }
+  return customer;
+};
+const saveSingleOrder = async (context, dataArray ,custDataKey, customer) => {
+  const seqClient = context.app.get('sequelizeClient');
+  let order = await getOrder(dataArray[custDataKey], seqClient);
+  order.customer_id = customer.id;
+  let ord = await order.save();
+
+  let {ops, extendedCost, quantity} = await updateOrderedProducts(ord, customer, dataArray[custDataKey], seqClient);
+  await checkError(customer, ops, context);
+  await ord.setOrderedProducts(ops, {save: false});
+  ord.quantity = quantity;
+  ord.cost = extendedCost;
+
+  ord = await ord.save();
+  await checkError(customer, ord, context);
+
+  return await generateResult(ord, customer, seqClient, dataArray[custDataKey]);
+};
 const saveOrder = () => {
   return async context => {
-
-
-    let dataArray = [];
-    if (context.method === 'update') {
-      dataArray = context.data;
-    } else {
-      dataArray = context.data;
-    }
+    let dataArray = context.data;
     for (const custDataKey in dataArray) {
-
-      const seqClient = context.app.get('sequelizeClient');
-      const customers = seqClient.models['customers'];
-      let customer;
-      if (context.result instanceof Array) {
-        customer = await customers.findByPk(context.result[custDataKey].id);
-
-      } else {
-        customer = await customers.findByPk(context.result.id);
-
-      }
+      let customer = await getCustomer(context, custDataKey);
       try {
-        let order = await getOrder(dataArray[custDataKey], seqClient);
-        order.customer_id = customer.id;
-        let ord = await order.save();
-
-        let {ops, extendedCost, quantity} = await updateOrderedProducts(ord, customer, dataArray[custDataKey], seqClient);
-        await checkError(customer, ops, context);
-        await ord.setOrderedProducts(ops, {save: false});
-        ord.quantity = quantity;
-        ord.cost = extendedCost;
-        //
-        ord = await ord.save();
-        await checkError(customer, ord, context);
-
-        dataArray[custDataKey] = await generateResult(ord, customer, seqClient, dataArray[custDataKey]);
+        dataArray[custDataKey] = await saveSingleOrder(context, dataArray, custDataKey, customer);
       }
       catch (e) {
+        console.log(e);
         await safeDeleteCustomer(customer, context);
         return context;
       }
@@ -296,24 +293,29 @@ const orderSequelizeOptions = (sequelize) => {
     }],
   };
 };
+const prepSingleOrder = async (context, dataKey) => {
+  const sequelize = context.app.get('sequelizeClient');
+  let update = context.method === 'update';
+  const user = sequelize.models['user'];
+
+  let customer = context.data[dataKey];
+  let usr;
+  if (update) {
+    usr = await user.findByPk(customer.user.id);
+  } else {
+    usr = await user.findByPk(customer.user);
+    customer.user_id = customer.user;
+    customer.year_id = customer.year;
+  }
+  return await updateCustomer(customer, usr, update);
+};
 const prepOrder = () => {
   return async context => {
     const sequelize = context.app.get('sequelizeClient');
 
     for (let dataKey in context.data) {
-      let update = context.method === 'update';
-      const user = sequelize.models['user'];
 
-      let customer = context.data[dataKey];
-      let usr;
-      if (update) {
-        usr = await user.findByPk(customer.user.id);
-      } else {
-        usr = await user.findByPk(customer.user);
-        customer.user_id = customer.user;
-        customer.year_id = customer.year;
-      }
-      context.data[dataKey] = await updateCustomer(customer, usr, update);
+      context.data[dataKey] = await prepSingleOrder(context, dataKey);
     }
     context.params.sequelize = orderSequelizeOptions(sequelize);
     return context;

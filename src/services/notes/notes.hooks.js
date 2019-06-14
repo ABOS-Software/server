@@ -6,18 +6,14 @@ const checkPermissions = require('../../hooks/check-permissions');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
 const makeArray = require('../../hooks/makeArray');
 const DeArray = require('../../hooks/DeArray');
-
+const {yearToId} = require('../utils');
 const sequelizeParams = () => {
   return async context => {
     const seqClient = context.app.get('sequelizeClient');
 
     const year = seqClient.models['year'];
     const note_codes = seqClient.models['note_codes'];
-    if (context.params.query && context.params.query.year) {
-      context.params.query.year_id = context.params.query.year;
-      delete context.params.query.year;
-
-    }
+    context = yearToId(context);
     context.params.sequelize = {
       attributes: ['id', 'note', 'updated_at', 'user_id', 'user_name', 'customer_id', 'year_id'],
       include: [{model: year, attributes: ['id', 'year']}, {model: note_codes, attributes: ['id', 'name']}]

@@ -178,7 +178,7 @@ module.exports = class reportsService {
     return cat;
   }
 
-  getSpecialInfos(inputs, delivery_date, cust) {
+  getSpecialInfos (inputs, delivery_date) {
     const {
       category,
       includeHeader,
@@ -233,6 +233,16 @@ module.exports = class reportsService {
 
   }
 
+  calculateCustomerTotalQuantity(category, cust) {
+    let orderArray = cust.order.orderedProducts;
+    const totalQuantity = orderArray.reduce((a, b) => {
+      if (b.products.category.category_name === category || category == 'ALL') {
+        return a + b.quantity;
+      } else {return a;}
+    }, 0);
+    return totalQuantity;
+  }
+
   doesCustomerHaveProducts(cust, category) {
     if (!cust.order) {
       return false;
@@ -241,12 +251,7 @@ module.exports = class reportsService {
       return false;
     }
 
-    let orderArray = cust.order.orderedProducts;
-    const totalQuantity = orderArray.reduce((a, b) => {
-      if (b.products.category.category_name === category || category == 'ALL') {
-        return a + b.quantity;
-      } else {return a;}
-    }, 0);
+    let totalQuantity = this.calculateCustomerTotalQuantity(category, cust);
     return (totalQuantity > 0);
   }
 
@@ -270,74 +275,104 @@ module.exports = class reportsService {
     return groups;
   }
 
+  generateTable(tCost, tQuant, data) {
+    let table = {
+      Product: [],
+      totalCost: 0.0,
+      totalQuantity: 0
+    };
+    table.Product = table.Product.concat(data.Product);
+    table.totalQuantity += tQuant;
+    table.totalCost += data.totalCost;
+    return table;
+  }
+
+  async generateCustomerPageAllCategory(cust, inputs, custYr) {
+    let productTables = [];
+    let retTCost = 0;
+    let retTQuant = 0;
+
+    const category = inputs.category;
+
+    let {tCost, tQuant, data} = await this.getCustomerProductData(cust, category);
+    let table = this.generateTable(tCost, tQuant, data);
+    retTCost += tCost;
+    retTQuant += tQuant;
+
+
+    if (table.totalQuantity > 0) {
+      productTables.push(table);
+    }
+    custYr = this.getDonationFields(custYr, cust.donation);
+    custYr.specialInfoBottom = this.getPaymentInfo(cust, retTCost);
+    custYr.prodTable = productTables;
+    custYr.TotalCost = retTCost;
+    custYr.TotalQuantity = retTQuant;
+    custYr.GrandTotal = cust.donation + retTCost;
+    return {tCost: retTCost, tQuant: retTQuant, data: custYr};
+  }
+
+  async generateDateGroupTable(cust, inputs, date, categories) {
+    let table = {
+      Product: [],
+      totalCost: 0.0,
+      totalQuantity: 0
+    };
+    let retTCost = 0;
+    let retTQuant = 0;
+    table.specialInfoTop = this.getSpecialInfos(inputs, date);
+
+    for (const category of categories) {
+      if (this.doesCustomerHaveProducts(cust, category)) {
+        let {tCost, tQuant, data} = await this.getCustomerProductData(cust, category);
+        table.Product = table.Product.concat(data.Product);
+        table.totalQuantity += tQuant;
+        table.totalCost += data.totalCost;
+        retTCost += tCost;
+        retTQuant += tQuant;
+      }
+    }
+
+    return {tCost: retTCost, tQuant: retTQuant, table: table};
+  }
+
+  async loopCategories(inputs, cust) {
+    let productTables = [];
+    let retTCost = 0;
+    let retTQuant = 0;
+    for (const [date, categories] of inputs.categories_grouped) {
+      let {tCost, tQuant, table} = await this.generateDateGroupTable(cust, inputs, date, categories);
+      retTCost += tCost;
+      retTQuant += tQuant;
+      if (table.totalQuantity > 0) {
+        productTables.push(table);
+      }
+
+    }
+    return {tCost: retTCost, tQuant: retTQuant, productTables: productTables};
+
+  }
+
+  async generateCustomerPageWithCategory(cust, inputs, custYr){
+    let {tCost, tQuant, productTables} = await this.loopCategories(inputs, cust);
+    custYr = this.getDonationFields(custYr, cust.donation);
+    custYr.specialInfoBottom = this.getPaymentInfo(cust, tCost);
+    custYr.prodTable = productTables;
+    custYr.TotalCost = tCost;
+    custYr.TotalQuantity = tQuant;
+    custYr.GrandTotal = cust.donation + tCost;
+    return {tCost: tCost, tQuant: tQuant, data: custYr};
+  }
+
   async generateCustomerPage(cust, inputs, header = true) {
     let custYr = this.customerTemplate();
     custYr.custAddr = header;
     custYr = this.getCustomerMetaFields(cust, custYr);
     if (inputs.category === 'All') {
-      let productTables = [];
-      let retTCost = 0;
-      let retTQuant = 0;
-      let table = {
-        Product: [],
-        totalCost: 0.0,
-        totalQuantity: 0
-      };
-      const category = inputs.category;
-
-      let {tCost, tQuant, data} = await this.getCustomerProductData(cust, category);
-      table.Product = table.Product.concat(data.Product);
-      table.totalQuantity += tQuant;
-      table.totalCost += data.totalCost;
-      retTCost += tCost;
-      retTQuant += tQuant;
-
-
-      if (table.totalQuantity > 0) {
-        productTables.push(table);
-      }
-      custYr = this.getDonationFields(custYr, cust.donation);
-      custYr.specialInfoBottom = this.getPaymentInfo(cust, retTCost);
-      custYr.prodTable = productTables;
-      custYr.TotalCost = retTCost;
-      custYr.TotalQuantity = retTQuant;
-      custYr.GrandTotal = cust.donation + retTCost;
-      return {tCost: retTCost, tQuant: retTQuant, data: custYr};
+      return await this.generateCustomerPageAllCategory(cust, inputs, custYr);
 
     } else {
-      let productTables = [];
-      let retTCost = 0;
-      let retTQuant = 0;
-      for (const [date, categories] of inputs.categories_grouped) {
-        let table = {
-          Product: [],
-          totalCost: 0.0,
-          totalQuantity: 0
-        };
-        table.specialInfoTop = this.getSpecialInfos(inputs, date, cust);
-
-        for (const category of categories) {
-          if (this.doesCustomerHaveProducts(cust, category)) {
-            let {tCost, tQuant, data} = await this.getCustomerProductData(cust, category);
-            table.Product = table.Product.concat(data.Product);
-            table.totalQuantity += tQuant;
-            table.totalCost += data.totalCost;
-            retTCost += tCost;
-            retTQuant += tQuant;
-          }
-        }
-        if (table.totalQuantity > 0) {
-          productTables.push(table);
-        }
-
-      }
-      custYr = this.getDonationFields(custYr, cust.donation);
-      custYr.specialInfoBottom = this.getPaymentInfo(cust, retTCost);
-      custYr.prodTable = productTables;
-      custYr.TotalCost = retTCost;
-      custYr.TotalQuantity = retTQuant;
-      custYr.GrandTotal = cust.donation + retTCost;
-      return {tCost: retTCost, tQuant: retTQuant, data: custYr};
+      return await this.generateCustomerPageWithCategory(cust, inputs, custYr);
 
     }
 

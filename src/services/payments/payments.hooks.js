@@ -6,6 +6,7 @@ const checkPermissions = require('../../hooks/check-permissions');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
 const makeArray = require('../../hooks/makeArray');
 const DeArray = require('../../hooks/DeArray');
+const {yearToId} = require('../utils');
 
 const sequelizeParams = () => {
   return async context => {
@@ -15,11 +16,8 @@ const sequelizeParams = () => {
     const payment_methods = seqClient.models['payment_methods'];
     const user = seqClient.models['user'];
 
-    if (context.params.query && context.params.query.year) {
-      context.params.query.year_id = context.params.query.year;
-      delete context.params.query.year;
+    context = yearToId(context);
 
-    }
     context.params.sequelize = {
       attributes: ['id', 'amount', 'payment_date', 'note', 'user_id', 'user_name', 'customer_id', 'order_id', 'year_id'],
       include: [{
@@ -57,8 +55,6 @@ const updateAmountPaid = () => {
       if(order) {
         order.amount_paid = totalPaid;
         await order.save();
-      } else {
-        console.log('test');
       }
     }
 
