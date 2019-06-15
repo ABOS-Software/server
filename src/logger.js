@@ -2,7 +2,7 @@ const {createLogger, format, transports} = require('winston');
 
 // Configure the Winston logger. For the complete documentation see https://github.com/winstonjs/winston
 const level = () => {
-  if (process.env.NODE_ENV !== 'PRODUCTION') {
+  if (process.env.NODE_ENV !== 'PRODUCTION' && process.env.NODE_ENV !== 'test'  && (!process.env.logging || process.env.logging !== 'false')) {
     return 'debug';
   }
   return 'info';

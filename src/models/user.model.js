@@ -50,7 +50,7 @@ module.exports = function (app) {
   user.associate = function (models) {
     // Define associations here
     // See http://docs.sequelizejs.com/en/latest/docs/associations/
-    user.hasMany(models.user_year);
+    user.hasMany(models.user_year, {onDelete: 'cascade'});
   };
 
   return user;

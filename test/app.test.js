@@ -1,11 +1,13 @@
 /* eslint-disable no-console */
 
+
 const assert = require('assert');
-var should = require('should');
+const should = require('should');
 
 const rp = require('request-promise');
 const url = require('url');
 const app = require('../src/app');
+const errorHandler = require('../src/hooks/errorHandler');
 const request = require('supertest');
 
 const port = app.get('port') || 3030;
@@ -37,6 +39,10 @@ before(async function () {
         await app.service('role').create([{
           authority: 'ROLE_ADMIN',
         }, {authority: 'ROLE_USER'}]);
+        await app.service('RoleHierarchyEntry').create({entry: 'ROLE_ADMIN > ROLE_USER'});
+        await app.service('note_codes').create({name: 'note', description: 'note'});
+        await app.service('payment_methods').create({name: 'cash'});
+
         await app.service('user').create({
           'username': 'test',
           'password': 'test',
@@ -44,9 +50,14 @@ before(async function () {
         }).then(user => {
           assert.ok(user, 'User Creation Failed');
           user.should.hasOwnProperty('role_id', 'NO Role_ID').above(0, 'NO ROLE ASSIGNED');
+
           user.should.hasOwnProperty('username', 'NO username').equal('test', 'Username not saved correctly');
+
           user.should.hasOwnProperty('full_name', 'NO full_name').equal('test Name', 'full name not saved correctly');
+
         });
+        await app.service('userManager').create({entry: 'ROLE_ADMIN > ROLE_USER'});
+
         await request(app)
           .post('/authentication')
           .send({
@@ -56,7 +67,6 @@ before(async function () {
           })
           .expect(201)
           .then((res, err) => {
-            console.log(res.body.accessToken);
             app.set('TEST_JWT_TOKEN', res.body.accessToken);
             resolve();
           });
@@ -68,20 +78,6 @@ before(async function () {
 });
 
 describe('Feathers application tests', () => {
-  /*  before(function (done) {
-      this.server = app.listen(port);
-      this.server.once('listening', () => done());
-    });
-    before(function () {
-      /!*    return app.get('sequelizeClient').sync({force: true}).then(() => {
-            return app.service('role').create([{
-              authority: 'ROLE_ADMIN',
-            }, {authority: 'ROLE_USER'}]);
-          });*!/
-    });
-    after(function (done) {
-      //this.server.close(done);
-    });*/
 
   it('starts and shows the index page', () => {
     return rp(getUrl()).then(body =>
@@ -125,7 +121,6 @@ describe('Feathers application tests', () => {
         })
         .expect(201)
         .end((err, res) => {
-          console.log(res.body.accessToken);
           app.set('TEST_JWT_TOKEN', res.body.accessToken);
           if (err) {
             done(err);
@@ -136,4 +131,43 @@ describe('Feathers application tests', () => {
     });
 
   });
+  describe ('Error Handling', function () {
+    it('Errors without a code', function () {
+      let fakeContext = {error: {
+        stack: 'stack',
+        code: null,
+        message: 'invalid message'
+      }};
+      let returnContext = errorHandler(fakeContext);
+      returnContext.should.containDeep({error: {code: 500, message: 'server error'}});
+    });
+    it('404 Error', function () {
+      let fakeContext = {error: {
+        stack: 'stack',
+        code: 404,
+        message: 'invalid message'
+      }};
+      let returnContext = errorHandler(fakeContext);
+      returnContext.should.containDeep({error: {code: 404, message: 'Error. Please retry in a few moments.', stack: null}});
+    });
+    it('400 Error', function () {
+      let fakeContext = {error: {
+        stack: 'stack',
+        code: 400,
+        message: 'invalid message'
+      }};
+      let returnContext = errorHandler(fakeContext);
+      returnContext.should.containDeep({error: {message: 'Error. Check you entered everything correctly.'}});
+    });
+    it('Other Error', function () {
+      let fakeContext = {error: {
+        stack: 'stack',
+        code: 418,
+        message: 'invalid message'
+      }};
+      let returnContext = errorHandler(fakeContext);
+      returnContext.should.containDeep({error: {message: 'Error. Please retry in a few moments.'}});
+    });
+  });
+
 });

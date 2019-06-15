@@ -10,28 +10,30 @@ const Sentry = require('@sentry/node');
 const feathers = require('@feathersjs/feathers');
 const configuration = require('@feathersjs/configuration');
 const express = require('@feathersjs/express');
-const socketio = require('@feathersjs/socketio');
 
 
 const middleware = require('./middleware');
 const services = require('./services');
 const appHooks = require('./app.hooks');
-const channels = require('./channels');
 
 const sequelize = require('./sequelize');
 //const setupTestData = require('./setupTestDataBase');
 const jsreport = require('./jsreport');
 
 const authentication = require('./authentication');
-Sentry.init({ dsn: 'https://46b1c3524371490ba2b98752ccc1dc5f@sentry.io/1365360' });
-Sentry.configureScope(scope => {
-  scope.addEventProcessor(async (event, hint) => {
+const validErrors = require('./Errors');
+Sentry.init({ dsn: 'https://46b1c3524371490ba2b98752ccc1dc5f@sentry.io/1365360',
+  beforeSend(event, hints) {
+
+    if (hints.originalException.code && !validErrors.includes(hints.originalException.code)) {
+      event = null;
+    }
     if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'staging') {
       event = null;
     }
     return event;
-  });
-});
+  }});
+
 const app = express(feathers());
 app.use(Sentry.Handlers.requestHandler());
 
@@ -49,7 +51,7 @@ app.use('/', express.static(app.get('public')));
 
 // Set up Plugins and providers
 app.configure(express.rest());
-app.configure(socketio());
+//app.configure(socketio());
 /*if (app.get('env') === 'test' || app.get('env') === 'test_local') {
   app.configure(setupTestData);
 }*/
@@ -63,7 +65,7 @@ app.configure(authentication);
 app.configure(services);
 
 // Set up event channels (see channels.js)
-app.configure(channels);
+//app.configure(channels);
 
 // Configure a middleware for 404s and the error handler
 app.use(Sentry.Handlers.errorHandler());

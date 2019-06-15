@@ -7,10 +7,9 @@ require('dotenv').load();
 if (app.get('env') !== 'test' && app.get('env') !== 'test_local') {
   const server = app.listen(port);
   server.on('listening', () => {
-      logger.info('Feathers application started on http://%s:%d', app.get('host'), port);
-      //app.emit('Ready');
-    }
-  );
+    logger.info('Feathers application started on http://%s:%d', app.get('host'), port);
+    //app.emit('Ready');
+  });
 }
 
 

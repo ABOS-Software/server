@@ -34,8 +34,8 @@ module.exports = function (app) {
 
   });
   schema.associate = models => {
-    schema.belongsTo(models.year);
-    schema.belongsTo(models.categories);
+    schema.belongsTo(models.year, {onDelete: 'cascade'});
+    schema.belongsTo(models.categories, {onDelete: 'cascade'});
 
   };
   return schema;

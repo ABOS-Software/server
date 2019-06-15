@@ -1,0 +1,305 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <title> {{info.reportTitle}}
+  </title>
+  <style type="text/css">
+    * {
+      margin-top: 0;
+      margin-bottom: 0;
+      font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+    }
+
+    .LBordered {
+      border-left: 1px solid black;
+      border-collapse: collapse;
+    }
+
+    .Bordered {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+
+    .UBordered {
+      border: 0 solid black;
+      border-collapse: collapse;
+    }
+
+    .splitTitle {
+
+    }
+
+    h4 {
+      margin: 1px;
+      padding: 1px;
+    }
+
+    table {
+      width: 100%;
+      margin: 0 0 0.4pt;text-indent: 0;
+    }
+
+    tr {
+      vertical-align: inherit;
+      border: 0;
+    }
+
+    table>tr {
+      vertical-align: middle;
+    }
+
+    td {
+      background-color: #FFF;
+      font-size: 10pt;
+      padding: 1px;
+      text-align: inherit;
+      vertical-align: inherit;
+    }
+
+    th {
+      background-color: #FFF;
+      font-size: 10pt;
+      color: #000;
+      display: table-cell;
+      font-weight: bold;
+      padding: 1px;
+      vertical-align: inherit;
+    }
+  </style>
+</head>
+
+<body>
+
+{{#each customerYear}}
+<div style="page-break-after: always;">
+  {{#if header}}
+  <table border="0" style="position:relative; width:100%">
+    <tr>
+      <td>
+        <img alt="logo" style="position:relative; width:200px; display:inline;" src="{{../info.logo}}" />
+
+
+
+      </td>
+      <td style="text-align:right; vertical-align: top">
+        <h4>
+          {{../info.name}}
+        </h4>
+        <h4>
+          {{../info.streetAddress}}
+
+        </h4>
+        <h4>
+          {{../info.city}}
+
+        </h4>
+        <h4>
+          {{../info.PhoneNumber}}
+
+        </h4>
+        <h4>
+          {{../info.rank}}
+
+        </h4>
+
+      </td>
+    </tr>
+  </table>
+  <div>
+    <h2 style="text-align:center; position:relative;">
+      {{../info.reportTitle}}
+
+    </h2>
+  </div>
+  {{/if}}
+  <div>
+    <h2 class="SplitTitle" style="text-align:center; position:relative">{{../splitting}} {{title}}</h2>
+
+    {{#if custAddr}}
+    <div style="">
+      <h4>
+        {{name}} </h4>
+      <h4>
+        {{streetAddress}}
+      </h4>
+      <h4>
+        {{city}}
+      </h4>
+      <h4>
+        {{PhoneNumber}}
+      </h4>
+    </div>
+    {{/if}}
+    <div>
+      {{#each specialInfo}}
+      <h2 class="specialInfo" style="text-align:center; position:relative">
+        {{text}}
+      </h2>
+      {{/each}}
+    </div>
+
+  </div>
+  {{#each prodTable}}
+    <div>
+      {{#each specialInfoTop}}
+      <h4 class="specialInfo" style="text-align:center; position:relative">
+        {{text}}
+      </h4>
+      {{/each}}
+    </div>
+  <table cellspacing="5" cellpadding="5" class="Bordered" style="width:100%; position:relative; padding-top:20px;clear:both;">
+    <tr bgcolor="#9acd32">
+      {{#each ../../column}}
+      <th style="text-align:left; border-bottom:1px solid black;">
+        {{name}}
+      </th>
+      {{/each}}
+    </tr>
+    {{#each Product}}
+
+    <tr class="Bordered" style="border-bottom:1px solid black;">
+      <td width="5%" style="border-bottom:1px solid black;">
+        {{ID}}
+      </td>
+      <td class="LBordered" style="border-bottom:1px solid black;" width="45%">
+        {{Name}}
+
+      </td>
+      <td class="LBordered" style="border-bottom:1px solid black;" width="10%">
+        {{Size}}
+
+      </td>
+      <td class="LBordered" style="border-bottom:1px solid black;" width="8%">
+        {{UnitCost}}
+
+      </td>
+      <td class="LBordered" style="border-bottom:1px solid black;" width="8%">
+        {{Quantity}}
+
+      </td>
+      <td class="LBordered" style="border-bottom:1px solid black;" width="8%">
+        {{TotalCost}}
+
+      </td>
+    </tr>
+    {{/each}}
+    <tr class="UBordered">
+      <td class="UBordered"></td>
+      <td class="UBordered"></td>
+      <td class="UBordered"></td>
+      <td class="UBordered"></td>
+      <td class="LBordered">Sub Total:</td>
+      <td class="LBordered">
+        {{totalCost}}
+      </td>
+    </tr>
+    {{#if includeDonation}}
+    <tr class="UBordered">
+      <td class="UBordered"></td>
+      <td class="UBordered"></td>
+      <td class="UBordered"></td>
+      <td class="UBordered"></td>
+      <td class="Bordered">Total Pledged Donation:</td>
+      <td class="Bordered">
+        {{Donation}}
+      </td>
+    </tr>
+    <tr class="UBordered">
+      <td class="UBordered"></td>
+      <td class="UBordered"></td>
+      <td class="UBordered"></td>
+      <td class="UBordered"></td>
+      <td style="border-left:1px solid black;">Grand Total:</td>
+      <td style="border-left:1px solid black;">
+        {{GrandTotal}}
+
+      </td>
+    </tr>
+    {{/if}}
+
+  </table>
+  <div>
+    {{#each specialInfoBottom}}
+    <h4 class="specialInfo" style="text-align:center; position:relative">
+      {{text}}
+    </h4>
+    {{/each}}
+  </div>
+  {{/each}}
+  <div>
+    {{#each DonationThanks}}
+    <h4 class="DonateGrat" style="text-align:center; position:relative; display:block; padding-top:80px; padding-bottom:20px; width:100%;">
+      {{text}}
+    </h4>
+    {{/each}}
+  </div>
+  <div>
+    {{#each specialInfoBottom}}
+    <h4 class="specialInfo" style="text-align:center; position:relative">
+      {{text}}
+    </h4>
+    {{/each}}
+  </div>
+  <div>
+    <table class="Bordered" border="0">
+
+
+    <tr class="Bordered">
+
+      <td>Total Cost:</td>
+      <td class="Bordered">  {{TotalCost}}
+      </td>
+    </tr>
+    <tr class="Bordered">
+
+      <td>Total Quantity:</td>
+      <td class="Bordered"> {{TotalQuantity}}
+      </td>
+    </tr>
+    {{#if includeDonation}}
+    <tr class="UBordered">
+
+      <td class="Bordered">Total Pledged Donation:</td>
+      <td class="Bordered">
+        {{Donation}}
+      </td>
+    </tr>
+    <tr class="UBordered">
+
+      <td style="border-left:1px solid black;">Grand Total:</td>
+      <td style="border-left:1px solid black;">
+        {{GrandTotal}}
+
+      </td>
+    </tr>
+    {{/if}}
+  </table>
+  </div>
+</div>
+{{/each}}
+<h2 style="text-align:right; position:relative;">
+  TOTALS
+</h2>
+<div style="position:relative;">
+  <table class="Bordered" border="0" style="position:absolute; top:0; right:0;">
+
+
+    <tr class="Bordered">
+
+      <td>Total Cost:</td>
+      <td class="Bordered">  {{info.TotalCost}}
+      </td>
+    </tr>
+    <tr class="Bordered">
+
+      <td>Total Quantity:</td>
+      <td class="Bordered"> {{info.TotalQuantity}}
+      </td>
+    </tr>
+
+  </table>
+</div>
+
+</body>
+
+</html>

@@ -5,12 +5,11 @@
 const {Forbidden, BadRequest} = require('@feathersjs/errors');
 const getYear = (context) => {
   let year = 1;
-
-  if (context.params.query.year) {
-    year = context.params.query.year;
-  } else if (context.params.query.year_id) {
+  if (context.params.query && context.params.query.year_id) {
     year = context.params.query.year_id;
-  } else if (context.params.user.enabledYear) {
+  } else if (context.params.query && context.params.query.year) {
+    year = context.params.query.year;
+  } else if (context.params.user && context.params.user.enabledYear) {
     year = context.params.user.enabledYear;
   }
   return year;
@@ -47,31 +46,74 @@ const getUserIds = (userManagers) => {
   return userIds;
 };
 const validate = async (context, userMangers, options) => {
-  const {field, createField} = options;
+  try {
+    const {field, createField} = options;
 
-  let userIds = getUserIds(userMangers);
-  if (context.method === 'find' || context.method === 'get') {
-    context.params.query[field] = {'$in': userIds};
+    let userIds = getUserIds(userMangers);
+    if (context.method === 'find' || context.method === 'get') {
+      context.params.query[field] = {'$in': userIds};
 
-  } else if (context.method === 'remove') {
-    let uId = await context.service.get(context.id);
-    checkIncludes(uId.user_id, userIds);
+    } else if (context.method === 'remove') {
+      let uId = await context.service.get(context.id);
+      checkIncludes(uId.user_id, userIds);
 
-  } else if (context.method === 'update') {
+    } else if (context.method === 'update') {
 
-    checkIncludes(context.data[field], userIds);
-  } else {
-    checkIncludes(context.data[createField], userIds);
+      checkIncludes(context.data[field], userIds);
+    } else {
+      checkIncludes(context.data[createField], userIds);
+
+    }
+    return context;
+  } catch (e) {
+    throw e;
+  }
+};
+const isAdmin = async (context) => {
+  const sequelize = context.app.get('sequelizeClient');
+  const role = sequelize.models['role'];
+  let userRole = await context.app.service('userRole').find({query: {user_id: context.params.payload.userId}, sequelize: {include: [{model: role, attributes: ['authority']}]}});
+  if (userRole && userRole.data.length === 1) {
+    return userRole.data[0].role.authority === 'ROLE_ADMIN';
+  } else {return false;}
+};
+
+const filter = async (context, options) => {
+  const {field} = options;
+
+  let uM = await getUMs(context, field);
+
+  delete context.params.query[field];
+  delete context.params.query.includeSub;
+
+  if (uM) {
+    try {
+      if (context.data instanceof Array) {
+        let fakeContext = {...context};
+        for (let dataKey in context.data) {
+          fakeContext.data = context.data[dataKey];
+          fakeContext = await validate(fakeContext, uM, options);
+          context.data[dataKey] = fakeContext.data;
+
+        }
+      } else {
+        context = await validate(context, uM, options);
+
+      }
+
+    } catch (e1) {
+      throw e1;
+    }
 
   }
   return context;
-};
+}
+
 module.exports = function (options = {}) {
   options = Object.assign({
     field: 'user_id',
     createField: 'user'
   }, options);
-  const {field} = options;
 
   return async context => {
     if (!context.params.provider) {
@@ -83,14 +125,13 @@ module.exports = function (options = {}) {
     if (!context.params.payload.userId) {
       throw new Forbidden('NOT AUTHENTICATED!');
     }
-    let uM = await getUMs(context, field);
-
-    delete context.params.query[field];
-    delete context.params.query.includeSub;
-
-    if (uM) {
-      context = await validate(context, uM, options);
-
+    if (await isAdmin(context)) {
+      return Promise.resolve(context);
+    }
+    try {
+      context = filter(context, options);
+    } catch (e) {
+      throw (e);
     }
     return context;
 

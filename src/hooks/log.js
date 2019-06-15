@@ -3,6 +3,7 @@
 // about the logger.
 const logger = require('../logger');
 const util = require('util');
+const validErrors = require('../Errors');
 
 // To see more detailed messages, uncomment the following line:
 // logger.level = 'debug';
@@ -16,7 +17,7 @@ const logContext = context => {
   }
 };
 const logError = context => {
-  if (context.error && !context.result) {
+  if (context.error) {
     logger.error(context.error.stack);
   }
 };

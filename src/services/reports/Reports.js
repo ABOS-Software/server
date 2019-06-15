@@ -5,8 +5,8 @@ module.exports = '<html>\n' +
   '  </title>\n' +
   '  <style type="text/css">\n' +
   '    * {\n' +
-  '      margin-top: 0px;\n' +
-  '      margin-bottom: 0px;\n' +
+  '      margin-top: 0;\n' +
+  '      margin-bottom: 0;\n' +
   '      font-family: \'Helvetica Neue\', \'Helvetica\', Helvetica, Arial, sans-serif;\n' +
   '    }\n' +
   '\n' +
@@ -21,7 +21,7 @@ module.exports = '<html>\n' +
   '    }\n' +
   '\n' +
   '    .UBordered {\n' +
-  '      border: 0px solid black;\n' +
+  '      border: 0 solid black;\n' +
   '      border-collapse: collapse;\n' +
   '    }\n' +
   '\n' +
@@ -36,11 +36,7 @@ module.exports = '<html>\n' +
   '\n' +
   '    table {\n' +
   '      width: 100%;\n' +
-  '      margin-bottom: 0.4pt;\n' +
-  '      margin-top: 0;\n' +
-  '      margin-left: 0;\n' +
-  '      margin-right: 0;\n' +
-  '      text-indent: 0;\n' +
+  '      margin: 0 0 0.4pt;text-indent: 0;\n' +
   '    }\n' +
   '\n' +
   '    tr {\n' +
@@ -143,11 +139,17 @@ module.exports = '<html>\n' +
   '    </div>\n' +
   '\n' +
   '  </div>\n' +
-  '  {{#if prodTable}}\n' +
-  '\n' +
+  '  {{#each prodTable}}\n' +
+  '    <div>\n' +
+  '      {{#each specialInfoTop}}\n' +
+  '      <h4 class="specialInfo" style="text-align:center; position:relative">\n' +
+  '        {{text}}\n' +
+  '      </h4>\n' +
+  '      {{/each}}\n' +
+  '    </div>\n' +
   '  <table cellspacing="5" cellpadding="5" class="Bordered" style="width:100%; position:relative; padding-top:20px;clear:both;">\n' +
   '    <tr bgcolor="#9acd32">\n' +
-  '      {{#each ../column}}\n' +
+  '      {{#each ../../column}}\n' +
   '      <th style="text-align:left; border-bottom:1px solid black;">\n' +
   '        {{name}}\n' +
   '      </th>\n' +
@@ -216,22 +218,70 @@ module.exports = '<html>\n' +
   '    {{/if}}\n' +
   '\n' +
   '  </table>\n' +
-  '  {{/if}}\n' +
   '  <div>\n' +
-  '    {{#each DonationThanks}}\n' +
-  '    <h2 class="DonateGrat" style="text-align:center; position:relative; display:block; padding-top:80px; padding-bottom:20px; width:100%;">\n' +
+  '    {{#each specialInfoBottom}}\n' +
+  '    <h4 class="specialInfo" style="text-align:center; position:relative">\n' +
   '      {{text}}\n' +
-  '    </h2>\n' +
+  '    </h4>\n' +
   '    {{/each}}\n' +
   '  </div>\n' +
+  '  {{/each}}\n' +
+  '  <div>\n' +
+  '    {{#each DonationThanks}}\n' +
+  '    <h4 class="DonateGrat" style="text-align:center; position:relative; display:block; padding-top:80px; padding-bottom:20px; width:100%;">\n' +
+  '      {{text}}\n' +
+  '    </h4>\n' +
+  '    {{/each}}\n' +
+  '  </div>\n' +
+  '  <div>\n' +
+  '    {{#each specialInfoBottom}}\n' +
+  '    <h4 class="specialInfo" style="text-align:center; position:relative">\n' +
+  '      {{text}}\n' +
+  '    </h4>\n' +
+  '    {{/each}}\n' +
+  '  </div>\n' +
+  '  <div>\n' +
+  '    <table class="Bordered" border="0">\n' +
   '\n' +
+  '\n' +
+  '    <tr class="Bordered">\n' +
+  '\n' +
+  '      <td>Total Cost:</td>\n' +
+  '      <td class="Bordered">  {{TotalCost}}\n' +
+  '      </td>\n' +
+  '    </tr>\n' +
+  '    <tr class="Bordered">\n' +
+  '\n' +
+  '      <td>Total Quantity:</td>\n' +
+  '      <td class="Bordered"> {{TotalQuantity}}\n' +
+  '      </td>\n' +
+  '    </tr>\n' +
+  '    {{#if includeDonation}}\n' +
+  '    <tr class="UBordered">\n' +
+  '\n' +
+  '      <td class="Bordered">Total Pledged Donation:</td>\n' +
+  '      <td class="Bordered">\n' +
+  '        {{Donation}}\n' +
+  '      </td>\n' +
+  '    </tr>\n' +
+  '    <tr class="UBordered">\n' +
+  '\n' +
+  '      <td style="border-left:1px solid black;">Grand Total:</td>\n' +
+  '      <td style="border-left:1px solid black;">\n' +
+  '        {{GrandTotal}}\n' +
+  '\n' +
+  '      </td>\n' +
+  '    </tr>\n' +
+  '    {{/if}}\n' +
+  '  </table>\n' +
+  '  </div>\n' +
   '</div>\n' +
   '{{/each}}\n' +
   '<h2 style="text-align:right; position:relative;">\n' +
   '  TOTALS\n' +
   '</h2>\n' +
   '<div style="position:relative;">\n' +
-  '  <table class="Bordered" border="0" style="position:absolute; top:0px; right:0px;">\n' +
+  '  <table class="Bordered" border="0" style="position:absolute; top:0; right:0;">\n' +
   '\n' +
   '\n' +
   '    <tr class="Bordered">\n' +
@@ -252,4 +302,4 @@ module.exports = '<html>\n' +
   '\n' +
   '</body>\n' +
   '\n' +
-  '</html>';
+  '</html>\n';
