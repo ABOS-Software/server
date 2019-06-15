@@ -17,7 +17,7 @@ const logContext = context => {
   }
 };
 const logError = context => {
-  if (context.error && !context.result && (!context.error.code || validErrors.includes(context.error.code))) {
+  if (context.error) {
     logger.error(context.error.stack);
   }
 };

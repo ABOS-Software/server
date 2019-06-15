@@ -1,0 +1,3 @@
+service: develop-fast
+runtime: nodejs10
+instance_class: F4

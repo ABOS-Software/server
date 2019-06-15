@@ -89,12 +89,24 @@ class ReportsGenerator {
     return data;
   }
 
+  safeString(data)  {
+    if (data === undefined) {
+      return '';
+    }
+    if (data instanceof Array) {
+      return data.join('-&');
+    }
+    else {
+      return data.toString();
+    }
+  }
+
   async getTemplateMetaData(jsonParams) {
     const seqClient = this.app.get('sequelizeClient');
     const year = seqClient.models['year'];
     let fileName = 'report.pdf';
-    let Category = jsonParams.Category || 'All';
-    let yearObj = await year.findByPk(jsonParams.Year);
+    let Category = this.safeString(jsonParams.Category) || 'All';
+    let yearObj = await year.findByPk(jsonParams.Year) || {year : ''};
     let yearText = yearObj.year;
 
     switch (jsonParams.template) {
@@ -130,6 +142,18 @@ class ReportsGenerator {
     }
   }
 
+  getCategoriesArray(jsonParams) {
+    if (!jsonParams.Category) {
+      return [];
+
+    }
+    if (jsonParams.Category instanceof Array) {
+      return jsonParams.Category;
+    } else {
+      return [jsonParams.Category];
+    }
+  }
+
   setLogoLocation(jsonParams) {
     if (!jsonParams.LogoLocation || !jsonParams.LogoLocation.base64) {
       jsonParams.LogoLocation = {base64: ''};
@@ -137,9 +161,9 @@ class ReportsGenerator {
     return jsonParams;
   }
 
-  async generate(jsonParams) {
-
+  async getOptions(jsonParams) {
     let customers = this.getCustomersArray(jsonParams);
+    let cates = this.getCategoriesArray(jsonParams);
     let user = jsonParams.User;
     let {Splitting, fileName, Category, includeHeader} = await this.getTemplateMetaData(jsonParams);
     let formattedAddress = jsonParams.city + ', ' + jsonParams.state + ' ' + jsonParams.zipCode;
@@ -155,6 +179,7 @@ class ReportsGenerator {
       scoutPhone: jsonParams.Scout_Phone,
       logoLoc: jsonParams.LogoLocation.base64,
       category: Category,
+      categories: cates,
       customers: customers,
       user: user,
       includeSubUsers: jsonParams.Include_Sub_Users,
@@ -162,8 +187,18 @@ class ReportsGenerator {
       splitting: Splitting,
       includeHeader: includeHeader,
     };
+    return {fileName: fileName, options: options};
+  }
 
-    let data = await this.generateJSON(options);
+  async generate(jsonParams) {
+
+    let {fileName, options} = await this.getOptions(jsonParams);
+    let data;
+    try {
+      data = await this.generateJSON(options);
+    } catch (e) {
+      console.log(e);
+    }
 
     return await {fileName: fileName, data: data};
 

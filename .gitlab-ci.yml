@@ -78,27 +78,27 @@ test:
     MYSQL_DATABASE: test
     MYSQL_ROOT_PASSWORD: $mysql_PASSWORD
     NODE_ENV: test
+    CC_TEST_REPORTER_ID: $CC_TEST_REPORTER_ID
   stage: test
-  image: node:8.15.0-alpine
-  before_script:
-
+  image: rotatingfans/jsreport-ci:latest
   after_script:
   script:
-    - apk add --no-cache git curl
-    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-    - chmod +x ./cc-test-reporter
-    - ./cc-test-reporter before-build
+    - mkdir test/outputFiles
+    - cc-test-reporter before-build
     - setup_test_db
     - yarn --dev install
     - yarn run coverage
     - yarn nyc report --reporter=lcov
-    - ./cc-test-reporter after-build
+    - cc-test-reporter after-build
 
   only:
     - branches
   except:
     variables:
       - $TEST_DISABLED
+  artifacts:
+    paths:
+      - test/outputFiles/
 
 code_quality:
   stage: test
@@ -652,6 +652,7 @@ production:
     echo "Create Config..."
     echo $APPLICATION_CONFIG > config/production.json
     echo "OCD_API_KEY="$OCD_API_KEY > .env
+
 
   }
 

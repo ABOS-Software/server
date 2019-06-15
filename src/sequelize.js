@@ -64,7 +64,7 @@ const getConfigSequelizeInstance = (connectionDetails, logging) => {
   });
 };
 const getLogger = (connectionDetails) => {
-  if (connectionDetails.logging) {
+  if (connectionDetails.logging && (!process.env.logging || process.env.logging !== 'false')) {
     // eslint-disable-next-line no-console
     return console.log;
   } else {

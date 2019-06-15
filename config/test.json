@@ -9,13 +9,20 @@
   "serviceOptions": {
     "raw": false
   },
+  "reports": {
+    "splitSize": "47578",
+    "yearSize": "41501",
+    "customerSize": "45182",
+    "historicalSize": "50163"
+
+  },
   "mysql": {
     "database": "sequelize_test",
     "username": "root",
     "password": "testPassword",
     "host": "mysql",
     "port": 3306,
-    "logging": true,
+    "logging": false,
     "dialectOptions": {
       "decimalNumbers": true
     }

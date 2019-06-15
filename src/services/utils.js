@@ -12,6 +12,16 @@ const getYearWhere = (context) => {
   return yrInc;
 };
 
+const yearToId = (context) => {
+  if (context.params.query && context.params.query.year) {
+    context.params.query.year_id = context.params.query.year;
+    delete context.params.query.year;
+
+  }
+  return context;
+};
+
 module.exports = {
-  getYearWhere: getYearWhere
+  getYearWhere: getYearWhere,
+  yearToId: yearToId
 };

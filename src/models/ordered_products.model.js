@@ -34,10 +34,10 @@ module.exports = function (app) {
     tableName: 'ordered_products', underscored: true,
   });
   schema.associate = models => {
-    schema.belongsTo(models.year);
-    schema.belongsTo(models.user);
+    schema.belongsTo(models.year, {onDelete: 'cascade'});
+    schema.belongsTo(models.user, {onDelete: 'cascade'});
 
-    schema.belongsTo(models.products, {as: 'products'});
+    schema.belongsTo(models.products, {as: 'products', onDelete: 'cascade'});
     schema.belongsTo(models.customers, {onDelete: 'cascade'});
     schema.belongsTo(models.orders);
 

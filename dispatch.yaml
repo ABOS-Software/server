@@ -1,0 +1,10 @@
+dispatch:
+  - url: "develop.server.rfans.me/*"
+    service: develop
+
+  - url: "staging.server.rfans.me/*"
+    service: staging
+
+  - url: "develop-fast.server.rfans.me/*"
+    service: develop-fast
+

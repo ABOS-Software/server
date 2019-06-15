@@ -1,10 +1,15 @@
 const {ValidationError} = require('sequelize');
+const Ajv = require('ajv');
+const {validateSchema} = require('feathers-hooks-common');
+const {customersCreate, customersEdit} = require('../../schemas');
 const {ordersInc, yearInc} = require('../../models/includes');
+const DeArray = require('../../hooks/DeArray');
 
 const {customerAttr, userAttr} = require('../../models/attributes');
 const {authenticate} = require('@feathersjs/authentication').hooks;
 const opencage = require('opencage-api-client');
 const checkPermissions = require('../../hooks/check-permissions');
+const makeArray = require('../../hooks/makeArray');
 const filterManagedUsers = require('../../hooks/filter-managed-users');
 const makeOptions = (sequelize, yearVal) => {
   const user = sequelize.models['user'];
@@ -95,6 +100,7 @@ const updateOrderedProducts = async (order, customer, custData, sequelize) => {
     let opM = await getOrderedProduct(op, sequelize);
     let product = await products.findByPk(op.products_id);
     opM.user_name = custData.user_name;
+    opM.extended_cost = opM.quantity * product.unit_cost;
     extendedCost += opM.extended_cost;
     quantity += opM.quantity;
     opM.setUser(user, {save: false});
@@ -107,39 +113,99 @@ const updateOrderedProducts = async (order, customer, custData, sequelize) => {
   }
   return {ops: ops, extendedCost: extendedCost, quantity: quantity};
 };
-const generateResult = async (ord, customer, seqClient, context) => {
+const generateResult = async (ord, customer, seqClient, result) => {
   const customers = seqClient.models['customers'];
 
   if (typeof ord !== ValidationError) {
     const options = await makeOptions(seqClient);
-    context.result = await customers.findByPk(customer.id, options);
-    if (context.result.dataValues.order) {
-      context.result.dataValues.order.dataValues.orderedProducts = calcProductCosts(context.result.dataValues.order);
+    result = await customers.findByPk(customer.id, options);
+    if (result.dataValues.order) {
+      result.dataValues.order.dataValues.orderedProducts = calcProductCosts(result.dataValues.order);
     }
   }
+  return result;
+};
+const checkError = async (customer, model, context) => {
+  if (Array.isArray(model)) {
+    let ret = [];
+    for (const mod of model) {
+      ret.push(await checkError(customer, mod));
+    }
+  }
+  if (typeof model === ValidationError) {
+    await safeDeleteCustomer(customer, context);
+    throw model;
+  }
+  return model;
+};
+const safeDeleteCustomerContext = () => {
+  return async context => {
+    if (context.method === 'create') {
+      let custData = context.result;
+
+
+      const seqClient = context.app.get('sequelizeClient');
+      const customers = seqClient.models['customers'];
+      if (custData && custData.id) {
+        let customer = await customers.findByPk(custData.id);
+        await safeDeleteCustomer(customer, context);
+      }
+    }
+    return context;
+  };
+};
+const safeDeleteCustomer = async (customer, context) => {
+  if (context.method === 'create' && customer) {
+    await customer.destroy();
+  }
+};
+const getCustomer = async (context, custDataKey) => {
+  let customer;
+  const seqClient = context.app.get('sequelizeClient');
+  const customers = seqClient.models['customers'];
+  if (context.result instanceof Array) {
+    customer = await customers.findByPk(context.result[custDataKey].id);
+
+  } else {
+    customer = await customers.findByPk(context.result.id);
+
+  }
+  return customer;
+};
+const saveSingleOrder = async (context, dataArray ,custDataKey, customer) => {
+  const seqClient = context.app.get('sequelizeClient');
+  let order = await getOrder(dataArray[custDataKey], seqClient);
+  order.customer_id = customer.id;
+  let ord = await order.save();
+
+  let {ops, extendedCost, quantity} = await updateOrderedProducts(ord, customer, dataArray[custDataKey], seqClient);
+  await checkError(customer, ops, context);
+  await ord.setOrderedProducts(ops, {save: false});
+  ord.quantity = quantity;
+  ord.cost = extendedCost;
+
+  ord = await ord.save();
+  await checkError(customer, ord, context);
+
+  return await generateResult(ord, customer, seqClient, dataArray[custDataKey]);
 };
 const saveOrder = () => {
   return async context => {
-    let custData;
-    if (context.method === 'update') {
-      custData = context.data;
-    } else {
-      custData = context.result;
+    let dataArray = context.data;
+    for (const custDataKey in dataArray) {
+      let customer = await getCustomer(context, custDataKey);
+      try {
+        dataArray[custDataKey] = await saveSingleOrder(context, dataArray, custDataKey, customer);
+      }
+      catch (e) {
+        console.log(e);
+        await safeDeleteCustomer(customer, context);
+        return context;
+      }
     }
+    context.result = dataArray;
+    return context;
 
-
-    const seqClient = context.app.get('sequelizeClient');
-    const customers = seqClient.models['customers'];
-
-    let order = await getOrder(custData, seqClient);
-    let customer = await customers.findByPk(custData.id);
-    let {ops, extendedCost, quantity} = await updateOrderedProducts(order, customer, custData, seqClient);
-    await order.setOrderedProducts(ops, {save: false});
-    order.quantity = quantity;
-    order.cost = extendedCost;
-    //
-    let ord = await order.save();
-    return await generateResult(ord, customer, seqClient, context);
   };
 };
 
@@ -185,6 +251,7 @@ const updateCustomer = async (customer, usr, update) => {
   customer.user_name = usr.username;
   customer.customer_name = customer.customerName;
   customer.street_address = customer.streetAddress;
+  customer.cust_email = customer.custEmail;
   customer.zip_code = customer.zipCode;
   let coords = await getCoords(customer.street_address + ' ' + customer.city + ', ' + customer.state + ' ' + customer.zipCode);
   if (coords) {
@@ -226,21 +293,30 @@ const orderSequelizeOptions = (sequelize) => {
     }],
   };
 };
+const prepSingleOrder = async (context, dataKey) => {
+  const sequelize = context.app.get('sequelizeClient');
+  let update = context.method === 'update';
+  const user = sequelize.models['user'];
+
+  let customer = context.data[dataKey];
+  let usr;
+  if (update) {
+    usr = await user.findByPk(customer.user.id);
+  } else {
+    usr = await user.findByPk(customer.user);
+    customer.user_id = customer.user;
+    customer.year_id = customer.year;
+  }
+  return await updateCustomer(customer, usr, update);
+};
 const prepOrder = () => {
   return async context => {
     const sequelize = context.app.get('sequelizeClient');
-    let update = context.method === 'update';
-    const user = sequelize.models['user'];
-    let customer = context.data;
-    let usr;
-    if (update) {
-      usr = await user.findByPk(customer.user.id);
-    } else {
-      usr = await user.findByPk(customer.user);
-      customer.user_id = customer.user;
-      customer.year_id = customer.year;
+
+    for (let dataKey in context.data) {
+
+      context.data[dataKey] = await prepSingleOrder(context, dataKey);
     }
-    context.data = await updateCustomer(customer, usr, update);
     context.params.sequelize = orderSequelizeOptions(sequelize);
     return context;
   };
@@ -301,8 +377,8 @@ module.exports = {
     all: [authenticate('jwt'), checkPermissions(['ROLE_USER']), filterManagedUsers()],
     find: [sequelizeParams(), fuzzySearch()],
     get: [sequelizeParams()],
-    create: [prepOrder()],
-    update: [prepOrder()],
+    create: [validateSchema(customersCreate, Ajv),makeArray(), prepOrder()],
+    update: [validateSchema(customersEdit, Ajv), makeArray(), prepOrder(),DeArray()],
     patch: [],
     remove: []
   },
@@ -311,8 +387,8 @@ module.exports = {
     all: [],
     find: [calcProductCostsHook()],
     get: [calcProductCostsHook()],
-    update: [saveOrder()],
-    create: [saveOrder()],
+    update: [makeArray(), saveOrder(),DeArray()],
+    create: [makeArray(), saveOrder(),DeArray()],
     patch: [],
     remove: []
   },
@@ -321,7 +397,7 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [],
+    create: [safeDeleteCustomerContext()],
     update: [],
     patch: [],
     remove: []

@@ -26,7 +26,7 @@ module.exports = function (app) {
     tableName: 'categories', underscored: true,
   });
   category.associate = models => {
-    category.belongsTo(models.year);
+    category.belongsTo(models.year, {onDelete: 'cascade'});
   };
   return category;
 };

@@ -18,18 +18,21 @@
     "test": "test/"
   },
   "engines": {
-    "node": "^8.0.0",
+    "node": "^10.0.0",
     "yarn": ">= 0.18.0"
   },
   "scripts": {
-    "test": "node src/setupTestDataBase.js && yarn run mocha",
-    "coverage": "node src/setupTestDataBase.js && nyc mocha $NODE_DEBUG_OPTION test/ --recursive --exit",
+    "coverageActive": "node src/setupTestDataBase.js && nyc mocha $NODE_DEBUG_OPTION test/Active/ --recursive --exit --require mocha-steps ",
+    "testActive": "node src/setupTestDataBase.js && mocha $NODE_DEBUG_OPTION test/Active/ --recursive --exit --require mocha-steps ",
+    "test": "node src/setupTestDataBase.js && yarn run mocha --require mocha-steps",
+    "coverage": "node src/setupTestDataBase.js && nyc mocha $NODE_DEBUG_OPTION test/ --recursive --exit --require mocha-steps",
     "eslint": "eslint src/. test/. --config .eslintrc.json",
     "dev": "nodemon src/",
     "start": "node $NODE_DEBUG_OPTION src/",
     "mocha": "mocha $NODE_DEBUG_OPTION test/ --recursive --exit"
   },
   "dependencies": {
+    "ajv": "^6.10.0",
     "@feathersjs/authentication": "^2.1.13",
     "@feathersjs/authentication-jwt": "^2.0.7",
     "@feathersjs/authentication-local": "^1.2.7",
@@ -50,7 +53,6 @@
     "jsreport-core": "^2.3.2",
     "jsreport-handlebars": "^2.0.0",
     "jsreport-jsrender": "^2.0.0",
-    "jsreport-phantom-pdf": "^2.1.4",
     "mysql2": "^1.6.4",
     "opencage-api-client": "^0.4.0",
     "pg": "^7.7.1",
@@ -64,11 +66,14 @@
   "devDependencies": {
     "eslint": "^5.9.0",
     "mocha": "^5.2.0",
+    "mocha-steps": "^1.3.0",
     "nodemon": "^1.18.7",
     "nyc": "^13.1.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
+    "rewire": "^4.0.1",
     "should": "^13.2.3",
+    "sleep-promise": "^8.0.1",
     "supertest": "^3.3.0",
     "tap-nyc": "^1.0.3"
   }
