@@ -29,7 +29,9 @@
     "eslint": "eslint src/. test/. --config .eslintrc.json",
     "dev": "nodemon src/",
     "start": "node $NODE_DEBUG_OPTION src/",
-    "mocha": "mocha $NODE_DEBUG_OPTION test/ --recursive --exit"
+    "mocha": "mocha $NODE_DEBUG_OPTION test/ --recursive --exit",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "dependencies": {
     "ajv": "^6.10.0",
@@ -61,7 +63,8 @@
     "sequelize": "^4.42.0",
     "serve-favicon": "^2.5.0",
     "sqlite3": "^4.0.4",
-    "winston": "^3.0.0"
+    "winston": "^3.0.0",
+    "snyk": "^1.189.0"
   },
   "devDependencies": {
     "eslint": "^5.9.0",
@@ -76,6 +79,7 @@
     "sleep-promise": "^8.0.1",
     "supertest": "^3.3.0",
     "tap-nyc": "^1.0.3"
-  }
+  },
+  "snyk": true
 }
 

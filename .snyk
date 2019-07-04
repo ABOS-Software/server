@@ -1,0 +1,18 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.5
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-LODASH-450202:
+    - '@feathersjs/authentication-local > lodash':
+        patched: '2019-07-04T05:31:11.547Z'
+    - sequelize > lodash:
+        patched: '2019-07-04T05:31:11.547Z'
+    - '@feathersjs/socketio > @feathersjs/transport-commons > lodash':
+        patched: '2019-07-04T05:31:11.547Z'
+    - winston > async > lodash:
+        patched: '2019-07-04T05:31:11.547Z'
+    - jsreport-core > listener-collection > async > lodash:
+        patched: '2019-07-04T05:31:11.547Z'
+    - jsreport-core > script-manager > portscanner > async > lodash:
+        patched: '2019-07-04T05:31:11.547Z'
