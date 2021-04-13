@@ -3026,13 +3026,10 @@ jsrender@0.9.90:
   dependencies:
     through2 "^2.0.0"
 
-jsreport-chrome-pdf@^1.2.1:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/jsreport-chrome-pdf/-/jsreport-chrome-pdf-1.2.2.tgz#822d0c8702ecc79ab2c989fab5bc8ee4de75e4c5"
-  integrity sha512-VICFqzZIVhcC9aEbFW0Gn901NeSTd8Jj46m9GmTU9xXP3zuPOZt1FoQdyk/OKjWj7s2H6IeFcLdEj/TUmnhL9w==
-  dependencies:
-    node.extend.without.arrays "1.1.5"
-    uuid "3.3.2"
+jsreport-chrome-pdf@^1.10.0:
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/jsreport-chrome-pdf/-/jsreport-chrome-pdf-1.10.0.tgz#ffc4b4d5418da819c12242ee8c06cf56e8a82c1b"
+  integrity sha512-TqSml9oyp9ErgrFB2WqEsNYhUveBsRxF6Bdjw8AOyZgBM7we2IbTFa9IdxoRqfJ+QX2rNTBos4MuPyPQlw8tOA==
 
 jsreport-core@^2.3.2:
   version "2.3.3"
